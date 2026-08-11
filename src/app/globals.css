@@ -1,0 +1,273 @@
+@import "tailwindcss";
+
+/* ============================================================
+   شریفمند (Sharifmand) — Legal Platform Design System
+   UI/UX Pro Max "Legal / Trust & Authority" pattern
+   Light: Navy (trust) + Gold (justice)
+   Dark : Premium gray / charcoal (calm, focused)
+   ============================================================ */
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  --background: #f5f7fb;
+  --surface: #ffffff;
+  --surface-2: #eef2f8;
+  --surface-3: #e3e9f3;
+  --border: #dce4ef;
+  --border-strong: #c4d0e2;
+  --foreground: #0e1d33;
+  --foreground-soft: #2a3c54;
+  --muted: #5a6b82;
+  --muted-soft: #7c8aa0;
+
+  --primary: #15365d;
+  --primary-hover: #0f2a48;
+  --primary-soft: #e8eef9;
+  --primary-foreground: #ffffff;
+
+  --accent: #b07d12;
+  --accent-hover: #946809;
+  --accent-soft: #f8efd8;
+  --accent-foreground: #2a2005;
+
+  --success: #1d7a4d;
+  --danger: #b42318;
+  --warning: #b54708;
+
+  --ring: #15365d;
+  --shadow-color: 16 24 40;
+
+  --radius: 16px;
+}
+
+/* ===== Dark theme: premium gray / charcoal ===== */
+.dark {
+  --background: #141416;
+  --surface: #1c1c20;
+  --surface-2: #242429;
+  --surface-3: #2d2d33;
+  --border: #33333a;
+  --border-strong: #44444d;
+  --foreground: #ededf0;
+  --foreground-soft: #d2d2d8;
+  --muted: #9b9ba4;
+  --muted-soft: #71717b;
+
+  --primary: #7aa7f0;
+  --primary-hover: #93baF4;
+  --primary-soft: #23262f;
+  --primary-foreground: #0b0c10;
+
+  --accent: #e6b94e;
+  --accent-hover: #efca78;
+  --accent-soft: #2a230f;
+  --accent-foreground: #16110a;
+
+  --success: #34d399;
+  --danger: #f87171;
+  --warning: #fbbf24;
+
+  --ring: #7aa7f0;
+  --shadow-color: 0 0 0;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-surface-3: var(--surface-3);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-foreground: var(--foreground);
+  --color-foreground-soft: var(--foreground-soft);
+  --color-muted: var(--muted);
+  --color-muted-soft: var(--muted-soft);
+
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-soft: var(--primary-soft);
+  --color-primary-foreground: var(--primary-foreground);
+
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-foreground: var(--accent-foreground);
+
+  --color-success: var(--success);
+  --color-danger: var(--danger);
+  --color-warning: var(--warning);
+
+  --font-sans: var(--font-vazirmatn), ui-sans-serif, system-ui, sans-serif;
+
+  --radius-card: 16px;
+  --radius-xl: 22px;
+
+  --shadow-card: 0 1px 2px rgb(var(--shadow-color) / 0.06), 0 8px 24px -8px rgb(var(--shadow-color) / 0.14);
+  --shadow-lift: 0 4px 12px rgb(var(--shadow-color) / 0.10), 0 24px 48px -16px rgb(var(--shadow-color) / 0.22);
+}
+
+* {
+  border-color: var(--border);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-feature-settings: "ss01";
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+}
+
+::selection {
+  background: color-mix(in oklab, var(--accent) 32%, transparent);
+}
+
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+::-webkit-scrollbar { width: 11px; height: 11px; }
+::-webkit-scrollbar-track { background: var(--surface-2); }
+::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: 99px;
+  border: 3px solid var(--surface-2);
+}
+::-webkit-scrollbar-thumb:hover { background: var(--muted-soft); }
+
+/* ===== Utilities ===== */
+.glass {
+  background: color-mix(in oklab, var(--surface) 78%, transparent);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+.card-shadow { box-shadow: var(--shadow-card); }
+.text-balance { text-wrap: balance; }
+
+/* Soft page wash for a calm, premium feel */
+.page-wash {
+  background-image:
+    radial-gradient(60% 50% at 85% -5%, color-mix(in oklab, var(--primary) 14%, transparent), transparent 70%),
+    radial-gradient(50% 40% at 10% 0%, color-mix(in oklab, var(--accent) 12%, transparent), transparent 70%);
+}
+
+/* ===== Scroll reveal (IntersectionObserver driven) ===== */
+.reveal {
+  opacity: 0;
+  transform: translateY(26px);
+  transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: opacity, transform;
+}
+.reveal.is-visible { opacity: 1; transform: none; }
+
+/* ===== Cinematic hero background ===== */
+.hero-grid {
+  background-image:
+    linear-gradient(to right, color-mix(in oklab, var(--border) 70%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in oklab, var(--border) 70%, transparent) 1px, transparent 1px);
+  background-size: 54px 54px;
+  mask-image: radial-gradient(ellipse 75% 60% at 50% 0%, #000 35%, transparent 100%);
+}
+
+.aurora-blob {
+  filter: blur(60px);
+  border-radius: 9999px;
+  will-change: transform;
+}
+
+/* ===== Keyframes / motion ===== */
+@keyframes float {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-16px) rotate(1.5deg); }
+}
+.animate-float { animation: float 7s ease-in-out infinite; }
+.animate-float-slow { animation: float 11s ease-in-out infinite; }
+
+@keyframes drift {
+  0% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(40px, -30px) scale(1.08); }
+  66% { transform: translate(-30px, 25px) scale(0.96); }
+  100% { transform: translate(0, 0) scale(1); }
+}
+.animate-drift { animation: drift 22s ease-in-out infinite; }
+.animate-drift-rev { animation: drift 26s ease-in-out infinite reverse; }
+
+@keyframes spin-slow { to { transform: rotate(360deg); } }
+.animate-spin-slow { animation: spin-slow 90s linear infinite; }
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-up { animation: fade-up 0.6s cubic-bezier(0.22, 1, 0.36, 1) both; }
+
+@keyframes scale-in {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: scale(1); }
+}
+.animate-scale-in { animation: scale-in 0.32s cubic-bezier(0.22, 1, 0.36, 1) both; }
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.45; transform: scale(0.8); }
+}
+.animate-pulse-dot { animation: pulse-dot 1.6s ease-in-out infinite; }
+
+@keyframes scroll-cue {
+  0% { transform: translateY(0); opacity: 0; }
+  40% { opacity: 1; }
+  100% { transform: translateY(14px); opacity: 0; }
+}
+.animate-scroll-cue { animation: scroll-cue 1.8s ease-in-out infinite; }
+
+@keyframes shimmer-text {
+  0% { background-position: 200% center; }
+  100% { background-position: -200% center; }
+}
+.shimmer-text {
+  background: linear-gradient(110deg, var(--foreground) 30%, var(--accent) 50%, var(--foreground) 70%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shimmer-text 6s linear infinite;
+}
+
+/* gradient underline sweep */
+.underline-sweep {
+  background-image: linear-gradient(90deg, var(--accent), var(--accent));
+  background-position: 100% 100%;
+  background-repeat: no-repeat;
+  background-size: 0% 2px;
+  transition: background-size 0.5s ease;
+}
+.underline-sweep:hover { background-size: 100% 2px; }
+
+/* aurora sweeping band */
+.aurora-band {
+  background: linear-gradient(110deg,
+    color-mix(in oklab, var(--primary) 16%, transparent),
+    color-mix(in oklab, var(--accent) 14%, transparent),
+    color-mix(in oklab, var(--primary) 16%, transparent));
+  background-size: 200% 100%;
+  animation: shimmer-text 14s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+  .reveal { opacity: 1 !important; transform: none !important; }
+}
