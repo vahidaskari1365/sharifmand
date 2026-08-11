@@ -183,3 +183,15 @@ export const pageViews = pgTable("page_views", {
   lastSeen: timestamp("last_seen").defaultNow().notNull(),
 });
 export type PageView = typeof pageViews.$inferSelect;
+
+/* ------------------------------ Users (auth) ------------------------------ */
+export const users = pgTable("app_users", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  phone: text("phone").notNull().unique(),
+  email: text("email").unique(),
+  passwordHash: text("password_hash").notNull(),
+  role: text("role").notNull().default("client"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+export type User = typeof users.$inferSelect;

@@ -1,35 +1,51 @@
 import type { Metadata } from "next";
+import { redirect } from "next/navigation";
+import { db } from "@/db";
+import { cases, consultations, tickets, lawyers } from "@/db/schema";
+import { desc } from "drizzle-orm";
 import { DashboardShell } from "@/components/dashboard-shell";
 import { Card, Badge } from "@/components/ui";
 import { Icon } from "@/components/icons";
 import { faNum } from "@/lib/data";
-
+import { getCurrentUser } from "@/lib/user-auth";
 export const metadata: Metadata = {
   title: "پنل وکیل — داشبورد مدیریت",
   description: "مدیریت پرونده‌ها، مشاوره‌ها، درآمد، موکلان و تقویم برای وکلای شریفمند.",
 };
-
 export const dynamic = "force-dynamic";
-
 export default async function LawyerDashboard() {
+  const user = await getCurrentUser();
+  if (!user) redirect("/login");
+
+  let myLawyer = null as null | { name: string; rating: number } | undefined;
+  let allCases: typeof cases.$inferSelect[] = [];
+  let allConsults: typeof consultations.$inferSelect[] = [];
+  let openTickets = 0;
+  try {
+    [myLawyer, allCases, allConsults] = await Promise.all([
+      db.select({ name: lawyers.name, rating: lawyers.rating }).from(lawyers).limit(1).then((r) => r[0]),
+      db.select().from(cases).orderBy(desc(cases.createdAt)).limit(6),
+      db.select().from(consultations).orderBy(desc(consultations.createdAt)).limit(6),
+    ]);
+    const t = await db.select().from(tickets);
+    openTickets = t.filter((x) => x.status === "open").length;
+  } catch {
+    /* degraded mode */
+  }
+
+  const activeCases = allCases.filter((c) => c.status !== "closed");
   const stats = [
-    { label: "پرونده‌های فعال", value: "۲۴", icon: "folder" as const },
-    { label: "درخواست‌های جدید", value: "۷", icon: "mail" as const },
-    { label: "جلسات امروز", value: "۳", icon: "calendar" as const },
-    { label: "درآمد این ماه", value: "۳۲م", icon: "money" as const },
+    { label: "پرونده‌های فعال", value: faNum(activeCases.length), icon: "folder" as const },
+    { label: "درخواست‌های جدید", value: faNum(allConsults.filter((c) => c.status === "pending").length), icon: "mail" as const },
+    { label: "تیکت‌های باز", value: faNum(openTickets), icon: "chat" as const },
+    { label: "امتیاز", value: myLawyer ? faNum(myLawyer.rating) : "—", icon: "star" as const },
   ];
-
-  const newRequests = [
-    { name: "علی محمدی", subject: "طلاق توافقی", city: "تهران", time: "۱۵ دقیقه پیش", budget: "۵ تا ۲۰ میلیون" },
-    { name: "مریم احمدی", subject: "چک برگشتی", city: "کرج", time: "۱ ساعت پیش", budget: "زیر ۵ میلیون" },
-    { name: "حسین رضایی", subject: "تصرف عدوانی", city: "قم", time: "۳ ساعت پیش", budget: "۲۰ تا ۵۰ میلیون" },
-  ];
-
-  const today = [
-    { title: "مشاوره تصویری — زهرا ک.", time: "۱۰:۰۰ تا ۱۰:۳۰", type: "video" },
-    { title: "جلسه پرونده ۱۲۵۸", time: "۱۲:۰۰ تا ۱۳:۰۰", type: "court" },
-    { title: "مشاوره متنی — رضا م.", time: "۱۶:۰۰", type: "chat" },
-  ];
+  const newRequests = allConsults.filter((c) => c.status === "pending").slice(0, 4).map((c) => ({
+    name: c.clientName, subject: c.subject, city: "—", time: c.type, budget: faNum(Number(c.price ?? 0)),
+  }));
+  const today = allCases.slice(0, 4).map((c) => ({
+    title: c.subject, time: c.caseNumber, type: c.stage,
+  }));
 
   return (
     <DashboardShell
@@ -37,7 +53,7 @@ export default async function LawyerDashboard() {
       title="داشبورد وکیل"
       nav={[
         { label: "نمای کلی", icon: "home", active: true },
-        { label: "پرونده‌های فعال", icon: "folder", badge: "۲۴" },
+        { label: "پرونده‌های فعال", icon: "folder", badge: faNum(activeCases.length) },
         { label: "درخواست‌های جدید", icon: "mail", badge: "۷" },
         { label: "مشاوره‌ها", icon: "chat" },
         { label: "موکلان", icon: "user" },

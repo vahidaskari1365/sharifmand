@@ -100,6 +100,7 @@ const DDL = [
   `CREATE TABLE IF NOT EXISTS consultations (id SERIAL PRIMARY KEY, lawyer_name TEXT, lawyer_id INTEGER, type consultation_type NOT NULL DEFAULT 'chat', duration INTEGER NOT NULL DEFAULT 30, client_name TEXT NOT NULL, client_phone TEXT NOT NULL, subject TEXT NOT NULL, scheduled_at TEXT, price NUMERIC(12,0) NOT NULL DEFAULT '0', status consultation_status NOT NULL DEFAULT 'pending', created_at TIMESTAMP NOT NULL DEFAULT now())`,
   `CREATE TABLE IF NOT EXISTS tickets (id SERIAL PRIMARY KEY, ticket_number TEXT NOT NULL, name TEXT NOT NULL, phone TEXT NOT NULL, category TEXT NOT NULL, message TEXT NOT NULL, status TEXT NOT NULL DEFAULT 'open', created_at TIMESTAMP NOT NULL DEFAULT now())`,
   `CREATE TABLE IF NOT EXISTS page_views (id SERIAL PRIMARY KEY, path TEXT NOT NULL UNIQUE, views INTEGER NOT NULL DEFAULT 0, last_seen TIMESTAMP NOT NULL DEFAULT now())`,
+  `CREATE TABLE IF NOT EXISTS app_users (id SERIAL PRIMARY KEY, name TEXT NOT NULL, phone TEXT NOT NULL UNIQUE, email TEXT UNIQUE, password_hash TEXT NOT NULL, role TEXT NOT NULL DEFAULT 'client', created_at TIMESTAMP NOT NULL DEFAULT now())`,
 ];
 
 export interface SeedCounts {

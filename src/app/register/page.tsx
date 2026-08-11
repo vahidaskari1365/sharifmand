@@ -13,12 +13,40 @@ export default function RegisterPage() {
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const submit = (e: React.FormEvent) => {
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name || !phone || !password) return;
     setLoading(true);
-    setTimeout(() => router.push(role === "lawyer" ? "/dashboard/lawyer" : "/dashboard/client"), 700);
+    setError("");
+    try {
+      const res = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, phone, password }),
+      });
+      const data = await res.json();
+      if (res.ok && data.ok) {
+        const login = await fetch("/api/auth/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ identifier: phone, password }),
+        });
+        if (login.ok) {
+          router.push(role === "lawyer" ? "/dashboard/lawyer" : "/dashboard/client");
+          router.refresh();
+        } else {
+          router.push("/login");
+        }
+      } else {
+        setError(data.error ?? "خطا در ثبت‌نام");
+        setLoading(false);
+      }
+    } catch {
+      setError("خطا در ارتباط با سرور");
+      setLoading(false);
+    }
   };
 
   const fieldCls = "h-11 w-full rounded-xl border border-border-strong bg-background px-3 text-sm text-foreground outline-none transition-colors focus:border-primary";
@@ -47,6 +75,7 @@ export default function RegisterPage() {
                 <span className="text-sm font-bold text-foreground">رمز عبور</span>
                 <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} className={`${fieldCls} mt-2`} placeholder="حداقل ۸ کاراکتر" />
               </label>
+              {error && <p className="text-sm font-semibold text-danger">{error}</p>}
               <Button type="submit" disabled={loading} className="w-full" icon="user">{loading ? "در حال ساخت حساب…" : "ثبت‌نام"}</Button>
             </form>
             {role === "lawyer" && (

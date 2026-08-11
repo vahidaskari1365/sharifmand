@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { Container } from "./ui";
+import { Container, Button } from "./ui";
 import { Icon } from "./icons";
 import type { IconKey } from "@/lib/data";
 
@@ -25,6 +25,7 @@ export function DashboardShell({
           <span className="inline-flex items-center gap-1.5 rounded-full bg-success/15 px-3 py-1.5 text-xs font-medium text-success">
             <span className="h-2 w-2 rounded-full bg-success" /> آنلاین
           </span>
+          <Button href="/api/auth/logout" variant="ghost" size="sm" icon="x">خروج</Button>
         </div>
       </div>
 
