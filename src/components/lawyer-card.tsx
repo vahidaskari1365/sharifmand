@@ -52,7 +52,7 @@ export function LawyerCard({ lawyer }: { lawyer: Lawyer }) {
         </div>
         <span className="inline-flex items-center gap-1 rounded-lg bg-primary-soft px-3 py-1.5 text-xs font-semibold text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
           مشاهده پروفایل
-          <Icon name="arrow" className="h-3.5 w-3.5 rotate-180" />
+          <Icon name="arrow" className="h-3.5 w-3.5" />
         </span>
       </div>
     </Link>

@@ -92,7 +92,7 @@ export default async function HomePage() {
                   <div className="min-w-0">
                     <div className="flex items-center gap-1.5">
                       <h3 className="font-bold text-foreground">{s.title}</h3>
-                      <Icon name="arrow" className="h-4 w-4 rotate-180 text-muted opacity-0 transition-opacity group-hover:opacity-100" />
+                      <Icon name="arrow" className="h-4 w-4 text-muted opacity-0 transition-opacity group-hover:opacity-100" />
                     </div>
                     <p className="mt-1 text-sm leading-6 text-muted">{s.desc}</p>
                   </div>
@@ -149,7 +149,7 @@ export default async function HomePage() {
                   title="وکلای برتر و تأییدشده"
                   desc="از میان وکلای متخصص با پروانه معتبر، انتخاب کنید."
                 />
-                <Button href="/lawyers" variant="outline" icon="arrow" className="rotate-180 shrink-0">
+                <Button href="/lawyers" variant="outline" icon="arrow" className="shrink-0">
                   همه وکلا
                 </Button>
               </div>

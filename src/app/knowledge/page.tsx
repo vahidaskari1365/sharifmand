@@ -75,7 +75,7 @@ export default async function KnowledgePage() {
                     <p className="mt-4 text-lg font-bold leading-8">آموزش گام‌به‌گام و کاربردی، همراه با مراحل، مدارک و ریسک‌ها.</p>
                     <span className="mt-6 inline-flex w-fit items-center gap-1.5 rounded-xl bg-white/15 px-4 py-2 text-sm font-semibold backdrop-blur transition-colors group-hover:bg-white/25">
                       مطالعه مقاله
-                      <Icon name="arrow" className="h-4 w-4 rotate-180" />
+                      <Icon name="arrow" className="h-4 w-4" />
                     </span>
                   </div>
                 </div>

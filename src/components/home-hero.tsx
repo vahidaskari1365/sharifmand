@@ -132,7 +132,7 @@ export function HomeHero() {
               <p className="text-sm text-foreground">
                 موضوع انتخاب‌شده: <span className="font-bold text-primary">{selected}</span>
               </p>
-              <Button onClick={go} size="sm" icon="arrow" className="mr-auto rotate-180">
+              <Button onClick={go} size="sm" icon="arrow" className="mr-auto">
                 مشاهده بهترین اقدام
               </Button>
             </div>

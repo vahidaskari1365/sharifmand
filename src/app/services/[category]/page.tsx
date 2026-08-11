@@ -123,7 +123,7 @@ export default async function ServiceCategoryPage({
         <Container className="py-8">
           <div className="flex items-center justify-between">
             <h2 className="text-xl font-bold text-foreground">وکلای متخصص {cat.name}</h2>
-            <Button href="/lawyers" variant="outline" size="sm" icon="arrow" className="rotate-180">همه وکلا</Button>
+            <Button href="/lawyers" variant="outline" size="sm" icon="arrow" className="">همه وکلا</Button>
           </div>
           <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {lawyersList.map((l) => (

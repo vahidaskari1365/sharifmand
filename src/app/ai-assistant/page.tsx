@@ -123,7 +123,7 @@ function GuidanceView({ g, echo }: { g: LegalGuidance; echo: string }) {
               href={a.href}
               className="inline-flex items-center gap-1.5 rounded-xl bg-white/15 px-3.5 py-2 text-xs font-semibold backdrop-blur transition-colors hover:bg-white/25"
             >
-              <Icon name="arrow" className="h-3.5 w-3.5 rotate-180" />
+              <Icon name="arrow" className="h-3.5 w-3.5" />
               {a.label}
             </a>
           ))}

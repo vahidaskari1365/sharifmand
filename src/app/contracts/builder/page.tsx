@@ -107,7 +107,7 @@ export default function ContractBuilderPage() {
                 <button type="button" onClick={() => setStep((s) => Math.max(0, s - 1))} className="text-sm font-medium text-muted hover:text-foreground">
                   {step === 0 ? "" : "→ قبلی"}
                 </button>
-                <Button onClick={() => setStep((s) => s + 1)} disabled={!canNext} icon="arrow" className="rotate-180">مرحله‌ی بعد</Button>
+                <Button onClick={() => setStep((s) => s + 1)} disabled={!canNext} icon="arrow" className="">مرحله‌ی بعد</Button>
               </div>
             )}
           </Card>

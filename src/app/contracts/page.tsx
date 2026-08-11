@@ -93,7 +93,7 @@ export default async function ContractsPage({
                   </div>
                   <span className="inline-flex items-center gap-1 text-xs font-semibold text-primary">
                     تنظیم قرارداد
-                    <Icon name="arrow" className="h-3.5 w-3.5 rotate-180" />
+                    <Icon name="arrow" className="h-3.5 w-3.5" />
                   </span>
                 </div>
               </a>

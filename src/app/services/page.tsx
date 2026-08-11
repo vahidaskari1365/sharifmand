@@ -49,7 +49,7 @@ export default function ServicesPage() {
                     </Link>
                   ))}
                 </div>
-                <Button href={`/services/${c.slug}`} variant="soft" icon="arrow" className="mt-5 w-full rotate-180">
+                <Button href={`/services/${c.slug}`} variant="soft" icon="arrow" className="mt-5 w-full">
                   مشاهده خدمت
                 </Button>
               </Card>
