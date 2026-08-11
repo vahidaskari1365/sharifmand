@@ -7,7 +7,7 @@ import { Icon } from "@/components/icons";
 import { AskForm } from "@/components/ask-form";
 import { faNum } from "@/lib/data";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 300;
 
 export const metadata: Metadata = {
   title: "پرسش و پاسخ حقوقی",

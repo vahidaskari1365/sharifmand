@@ -6,7 +6,7 @@ import { Container, Badge, EmptyState } from "@/components/ui";
 import { Icon } from "@/components/icons";
 import { faNum, relativeTime } from "@/lib/data";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 300;
 
 export const metadata: Metadata = {
   title: "بانک دانش و مقالات حقوقی",

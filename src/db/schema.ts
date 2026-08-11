@@ -174,3 +174,12 @@ export type QaQuestion = typeof qaQuestions.$inferSelect;
 export type Case = typeof cases.$inferSelect;
 export type Consultation = typeof consultations.$inferSelect;
 export type Review = typeof reviews.$inferSelect;
+
+/* ------------------------------ Page views (tracking) ------------------------------ */
+export const pageViews = pgTable("page_views", {
+  id: serial("id").primaryKey(),
+  path: text("path").notNull().unique(),
+  views: integer("views").notNull().default(0),
+  lastSeen: timestamp("last_seen").defaultNow().notNull(),
+});
+export type PageView = typeof pageViews.$inferSelect;

@@ -6,6 +6,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { noFlashScript } from "@/components/no-flash";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
+import { Tracker } from "@/components/tracker";
 
 const vazirmatn = Vazirmatn({
   subsets: ["arabic", "latin"],
@@ -87,6 +88,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             {children}
           </main>
           <Footer />
+          <Tracker />
         </ThemeProvider>
       </body>
     </html>

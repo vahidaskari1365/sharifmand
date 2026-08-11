@@ -5,7 +5,7 @@ import { Container, Card } from "@/components/ui";
 import { Icon } from "@/components/icons";
 import { TRUST_PAGES } from "@/lib/content";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 300;
 
 // Generic legal/trust content blocks per page.
 const CONTENT: Record<string, { h: string; p: string }[]> = {

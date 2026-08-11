@@ -1,123 +1,145 @@
-import type { Metadata } from "next";
-import { PageHero } from "@/components/page-hero";
+import { redirect } from "next/navigation";
+import Link from "next/link";
+import { db } from "@/db";
+import { lawyers, articles, contracts, qaQuestions, cases, consultations, tickets, pageViews } from "@/db/schema";
+import { count, desc, sum } from "drizzle-orm";
+import { isAdmin } from "@/lib/admin-auth";
 import { Container, Card, Badge, Button } from "@/components/ui";
 import { Icon } from "@/components/icons";
-import { Reveal } from "@/components/reveal";
 import { faNum } from "@/lib/data";
+import { PageHero } from "@/components/page-hero";
 
-export const metadata: Metadata = {
-  title: "پنل مدیریت (Admin)",
-  description: "داشبورد مدیریت پلتفرم شریفمند: کاربران، وکلا، احراز هویت، محتوا، مالی، پشتیبانی و تحلیل.",
-  alternates: { canonical: "/admin" },
-};
+export const dynamic = "force-dynamic";
 
-const STATS = [
-  { label: "کاربران", value: "۸٬۴۲۰", icon: "user" as const, tone: "primary" as const },
-  { label: "وکلای فعال", value: "۱٬۲۶۴", icon: "badge" as const, tone: "accent" as const },
-  { label: "پرونده‌های باز", value: "۳۱۲", icon: "folder" as const, tone: "success" as const },
-  { label: "درآمد ماه", value: "۸۴م", icon: "money" as const, tone: "neutral" as const },
-];
+async function getStats() {
+  const empty = { value: 0 };
+  try {
+    const [l, a, c, q, cs, co, t, pv] = await Promise.all([
+      db.select({ value: count() }).from(lawyers),
+      db.select({ value: count() }).from(articles),
+      db.select({ value: count() }).from(contracts),
+      db.select({ value: count() }).from(qaQuestions),
+      db.select({ value: count() }).from(cases),
+      db.select({ value: count() }).from(consultations),
+      db.select({ value: count() }).from(tickets),
+      db.select({ value: sum(pageViews.views) }).from(pageViews),
+    ]);
+    return {
+      lawyers: l[0]?.value ?? 0,
+      articles: a[0]?.value ?? 0,
+      contracts: c[0]?.value ?? 0,
+      qa: q[0]?.value ?? 0,
+      cases: cs[0]?.value ?? 0,
+      consultations: co[0]?.value ?? 0,
+      tickets: t[0]?.value ?? 0,
+      views: Number(pv[0]?.value ?? 0),
+    };
+  } catch {
+    return { lawyers: 0, articles: 0, contracts: 0, qa: 0, cases: 0, consultations: 0, tickets: 0, views: 0 };
+  }
+}
 
-const MODULES = [
-  { group: "کاربران و احراز هویت", items: ["کاربران", "وکلا", "شرکت‌ها", "احراز هویت"], icon: "user" as const },
-  { group: "Marketplace", items: ["خدمات", "سفارش‌ها", "رزروها", "پرونده‌ها"], icon: "briefcase" as const },
-  { group: "محتوا", items: ["مقالات", "قوانین", "سؤالات", "صفحات"], icon: "book" as const },
-  { group: "مالی", items: ["پرداخت‌ها", "کمیسیون", "بازپرداخت", "تسویه"], icon: "money" as const },
-  { group: "پشتیبانی", items: ["تیکت", "شکایت", "گزارش تخلف"], icon: "chat" as const },
-  { group: "تحلیل (Analytics)", items: ["کاربران", "درآمد", "Conversion", "خدمات محبوب"], icon: "sparkles" as const },
-];
+export default async function AdminPage() {
+  if (!(await isAdmin())) redirect("/admin/login");
+  const s = await getStats();
+  let recent: { id: number; slug: string; title: string; views: number; publishedAt: Date }[] = [];
+  try {
+    recent = await db
+      .select({ id: articles.id, slug: articles.slug, title: articles.title, views: articles.views, publishedAt: articles.publishedAt })
+      .from(articles)
+      .orderBy(desc(articles.publishedAt))
+      .limit(8);
+  } catch {
+    recent = [];
+  }
 
-const TASKS = [
-  { t: "تأیید پروانه ۳ وکیل جدید", p: "high", c: "احراز هویت" },
-  { t: "۵ تیکت پشتیبانی پاسخ‌نشده", p: "medium", c: "پشتیبانی" },
-  { t: "بازپرداخت در انتظار تأیید", p: "high", c: "مالی" },
-  { t: "گزارش تخلف یک وکیل", p: "medium", c: "پشتیبانی" },
-];
+  const stats = [
+    { label: "وکلا", value: s.lawyers, icon: "badge" as const, tone: "primary" as const, href: "/lawyers" },
+    { label: "مقالات", value: s.articles, icon: "book" as const, tone: "accent" as const, href: "/knowledge" },
+    { label: "قراردادها", value: s.contracts, icon: "file" as const, tone: "success" as const, href: "/contracts" },
+    { label: "پرسش و پاسخ", value: s.qa, icon: "chat" as const, tone: "neutral" as const, href: "/qa" },
+    { label: "پرونده‌ها", value: s.cases, icon: "folder" as const, tone: "primary" as const, href: "/cases/create" },
+    { label: "مشاوره‌ها", value: s.consultations, icon: "calendar" as const, tone: "accent" as const, href: "/consultation" },
+    { label: "تیکت‌ها", value: s.tickets, icon: "chat" as const, tone: "neutral" as const, href: "/support" },
+    { label: "بازدید صفحات", value: s.views, icon: "sparkles" as const, tone: "success" as const, href: "#tracking" },
+  ];
 
-export default function AdminPage() {
   return (
     <>
       <PageHero
         badge="Admin · پنل مدیریت"
-        title="داشبورد مدیریت پلتفرم"
-        desc="مدیریت کامل کاربران، وکلا، محتوا، مالی، پشتیبانی و تحلیل — بر پایه‌ی RBAC و Audit Log."
+        title="داشبورد مدیریت شریفمند"
+        desc="مدیریت محتوا، داده‌های سایت و آمار بازدید — با ورود امن مدیر."
         breadcrumb={[{ label: "خانه", href: "/" }, { label: "پنل مدیریت" }]}
       >
         <div className="flex flex-wrap gap-2">
-          <Button href="/developer" variant="outline" icon="landmark" size="sm">نقشه‌ی دیتابیس</Button>
-          <Badge tone="success" icon="shield">دسترسی SUPER_ADMIN</Badge>
+          <Button href="/admin/articles/new" variant="primary" icon="plus" size="sm">مقاله جدید</Button>
+          <Button href="/admin/articles" variant="outline" icon="book" size="sm">مدیریت مقالات</Button>
+          <Button href="/api/admin/logout" variant="ghost" icon="x" size="sm">خروج</Button>
         </div>
       </PageHero>
-
       <Container className="py-12">
-        {/* Stats */}
         <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-          {STATS.map((s, i) => (
-            <Reveal key={s.label} delay={i * 50}>
-              <Card hover={false} className="flex items-center gap-3">
-                <span className={`inline-flex h-11 w-11 items-center justify-center rounded-xl ${s.tone === "primary" ? "bg-primary-soft text-primary" : s.tone === "accent" ? "bg-accent-soft text-accent" : s.tone === "success" ? "bg-success/15 text-success" : "bg-surface-2 text-foreground-soft"}`}>
-                  <Icon name={s.icon} className="h-5 w-5" />
+          {stats.map((st) => (
+            <Link key={st.label} href={st.href}>
+              <Card hover className="flex items-center gap-3">
+                <span className={`inline-flex h-11 w-11 items-center justify-center rounded-xl ${st.tone === "primary" ? "bg-primary-soft text-primary" : st.tone === "accent" ? "bg-accent-soft text-accent" : st.tone === "success" ? "bg-success/15 text-success" : "bg-surface-2 text-foreground-soft"}`}>
+                  <Icon name={st.icon} className="h-5 w-5" />
                 </span>
-                <div><p className="text-xl font-extrabold text-foreground">{s.value}</p><p className="text-xs text-muted">{s.label}</p></div>
+                <span>
+                  <span className="block text-xl font-black text-foreground">{faNum(st.value)}</span>
+                  <span className="text-xs font-semibold text-foreground-soft">{st.label}</span>
+                </span>
               </Card>
-            </Reveal>
+            </Link>
           ))}
         </div>
 
-        <div className="mt-8 grid gap-8 lg:grid-cols-[1.6fr_1fr]">
-          {/* Modules */}
-          <div>
-            <h2 className="text-lg font-bold text-foreground">ماژول‌های مدیریت</h2>
-            <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {MODULES.map((m, i) => (
-                <Reveal key={m.group} delay={i * 40}>
-                  <Card hover={false} className="h-full">
-                    <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-primary-soft text-primary"><Icon name={m.icon} className="h-5 w-5" /></span>
-                    <h3 className="mt-3 text-sm font-bold text-foreground">{m.group}</h3>
-                    <div className="mt-2 flex flex-wrap gap-1.5">
-                      {m.items.map((it) => <span key={it} className="rounded-full bg-surface-2 px-2 py-0.5 text-[11px] text-foreground-soft">{it}</span>)}
-                    </div>
-                  </Card>
-                </Reveal>
+        <div className="mt-10 grid gap-6 lg:grid-cols-3">
+          <div className="lg:col-span-2">
+            <div className="mb-4 flex items-center justify-between">
+              <h2 className="text-lg font-black text-foreground">آخرین مقالات</h2>
+              <Button href="/admin/articles" variant="ghost" size="sm">همه مقالات</Button>
+            </div>
+            <div className="space-y-3">
+              {recent.length === 0 && <Card hover={false}><p className="text-sm text-foreground-soft">دیتابیس در دسترس نیست یا مقاله‌ای ثبت نشده است.</p></Card>}
+              {recent.map((a) => (
+                <Card key={a.id} hover className="flex items-center justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-bold text-foreground">{a.title}</p>
+                    <p className="mt-0.5 text-xs text-foreground-soft" dir="ltr">/{a.slug}</p>
+                  </div>
+                  <div className="flex shrink-0 items-center gap-2">
+                    <Badge tone="neutral">{faNum(a.views)} بازدید</Badge>
+                    <a href={`/admin/articles/${a.id}/edit`} className="text-sm font-semibold text-primary hover:underline">ویرایش</a>
+                  </div>
+                </Card>
               ))}
             </div>
           </div>
 
-          {/* Tasks */}
-          <div>
-            <h2 className="text-lg font-bold text-foreground">کارهای در انتظار</h2>
-            <div className="mt-4 space-y-3">
-              {TASKS.map((task, i) => (
-                <Reveal key={i} delay={i * 40}>
-                  <Card hover={false} className="flex items-center gap-3">
-                    <span className={`h-2.5 w-2.5 shrink-0 rounded-full ${task.p === "high" ? "bg-danger" : "bg-warning"}`} />
-                    <div className="flex-1"><p className="text-sm font-medium text-foreground">{task.t}</p><p className="text-[11px] text-muted">{task.c}</p></div>
-                    <Badge tone={task.p === "high" ? "danger" : "accent"}>{task.p === "high" ? "فوری" : "متوسط"}</Badge>
+          <div id="tracking">
+            <div className="mb-4 flex items-center justify-between">
+              <h2 className="text-lg font-black text-foreground">مدیریت سریع</h2>
+            </div>
+            <div className="space-y-3">
+              {[
+                { label: "مدیریت مقالات", href: "/admin/articles", icon: "book" as const },
+                { label: "مقاله جدید", href: "/admin/articles/new", icon: "plus" as const },
+                { label: "وکلای سایت", href: "/lawyers", icon: "badge" as const },
+                { label: "قراردادها", href: "/contracts", icon: "file" as const },
+                { label: "دانشنامه حقوقی", href: "/knowledge", icon: "sparkles" as const },
+                { label: "بازگشت به سایت", href: "/", icon: "home" as const },
+              ].map((m) => (
+                <Link key={m.label + m.href} href={m.href}>
+                  <Card hover className="flex items-center gap-3">
+                    <Icon name={m.icon} className="h-4 w-4 text-primary" />
+                    <span className="text-sm font-bold text-foreground">{m.label}</span>
                   </Card>
-                </Reveal>
+                </Link>
               ))}
             </div>
           </div>
-        </div>
-
-        {/* Audit / RBAC note */}
-        <div className="mt-8 grid gap-4 lg:grid-cols-2">
-          <Card hover={false}>
-            <h3 className="flex items-center gap-2 text-sm font-bold text-foreground"><Icon name="lock" className="h-4 w-4 text-primary" /> کنترل دسترسی (RBAC)</h3>
-            <p className="mt-2 text-xs leading-6 text-muted">دسترسی‌ها مبتنی بر نقش و دسترسی ریزدانه است (مثلاً <span className="font-mono">case.read</span>، <span className="font-mono">lawyer.verify</span>). کاربر فقط به پرونده‌هایی دسترسی دارد که عضو آن‌هاست.</p>
-            <div className="mt-3 flex flex-wrap gap-1.5">{["USER", "CLIENT", "LAWYER", "ADMIN", "SUPER_ADMIN"].map((r) => <Badge key={r} tone="primary" >{r}</Badge>)}</div>
-          </Card>
-          <Card hover={false}>
-            <h3 className="flex items-center gap-2 text-sm font-bold text-foreground"><Icon name="landmark" className="h-4 w-4 text-accent" /> Audit Log</h3>
-            <p className="mt-2 text-xs leading-6 text-muted">تمام عملیات حساس (مشاهده‌ی سند، تغییر وضعیت وکیل، پرداخت) در <span className="font-mono">audit_logs</span> با IP و User-Agent ثبت و قابل ردیابی است.</p>
-            <div className="mt-3 flex items-center gap-2 text-[11px] text-muted">
-              <span className="rounded-md bg-surface-2 px-2 py-0.5 font-mono">create</span>
-              <span className="rounded-md bg-surface-2 px-2 py-0.5 font-mono">update</span>
-              <span className="rounded-md bg-surface-2 px-2 py-0.5 font-mono">view</span>
-              <span className="rounded-md bg-surface-2 px-2 py-0.5 font-mono">delete</span>
-              <span className="rounded-md bg-surface-2 px-2 py-0.5 font-mono">{faNum(12400)} رخداد</span>
-            </div>
-          </Card>
         </div>
       </Container>
     </>

@@ -32,6 +32,7 @@ const COLS: { title: string; links: { label: string; href: string }[] }[] = [
       { label: "برای کسب‌وکارها", href: "/business" },
       { label: "پنل موکل", href: "/dashboard/client" },
       { label: "پنل وکیل", href: "/dashboard/lawyer" },
+      { label: "پنل مدیریت", href: "/admin" },
       { label: "تماس و پشتیبانی", href: "/support" },
     ],
   },

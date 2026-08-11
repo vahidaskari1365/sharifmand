@@ -2,18 +2,27 @@ import type { MetadataRoute } from "next";
 import { db } from "@/db";
 import { lawyers, contracts, articles, qaQuestions } from "@/db/schema";
 import { GLOSSARY, LAWS, JUDGMENTS, LEGAL_FORMS } from "@/lib/content";
+import { SITE_URL } from "@/lib/site";
 
 export const dynamic = "force-dynamic";
 
-const BASE = "https://sharifmand.ir";
+const BASE = SITE_URL;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [lw, ct, ar, qa] = await Promise.all([
-    db.select({ slug: lawyers.slug, updatedAt: lawyers.createdAt }).from(lawyers),
-    db.select({ slug: contracts.slug }).from(contracts),
-    db.select({ slug: articles.slug, updatedAt: articles.publishedAt }).from(articles),
-    db.select({ slug: qaQuestions.slug }).from(qaQuestions),
-  ]);
+  let lw: { slug: string; updatedAt: Date }[] = [];
+  let ct: { slug: string }[] = [];
+  let ar: { slug: string; updatedAt: Date }[] = [];
+  let qa: { slug: string }[] = [];
+  try {
+    [lw, ct, ar, qa] = await Promise.all([
+      db.select({ slug: lawyers.slug, updatedAt: lawyers.createdAt }).from(lawyers),
+      db.select({ slug: contracts.slug }).from(contracts),
+      db.select({ slug: articles.slug, updatedAt: articles.publishedAt }).from(articles),
+      db.select({ slug: qaQuestions.slug }).from(qaQuestions),
+    ]);
+  } catch {
+    /* degrade gracefully when DB is not configured */
+  }
 
   const staticRoutes: MetadataRoute.Sitemap = [
     "", "services", "services/family", "services/property", "services/criminal", "services/commercial", "services/administrative",
@@ -22,6 +31,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     "pricing", "business", "about", "contact", "support", "notifications", "login", "register",
     "dashboard/client", "dashboard/lawyer", "dashboard/documents",
     "legal/terms", "legal/privacy", "legal/refund-policy", "legal/security", "legal/transparency",
+    "glossary/*",
   ].map((r) => ({
     url: `${BASE}/${r}`,
     lastModified: new Date(),
@@ -34,7 +44,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...LAWS.map((l) => `${BASE}/laws/${l.slug}`),
     ...JUDGMENTS.map((j) => `${BASE}/judgments/${j.slug}`),
     ...LEGAL_FORMS.map((f) => `${BASE}/legal-forms/${f.slug}`),
-    "https://sharifmand.ir/services/family/divorce",
+    `${BASE}/services/family/divorce`,
   ].map((url) => ({ url, lastModified: new Date(), changeFrequency: "monthly" as const, priority: 0.6 }));
 
   return [
@@ -43,5 +53,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...lw.map((l) => ({ url: `${BASE}/lawyers/${l.slug}`, lastModified: l.updatedAt, changeFrequency: "monthly" as const, priority: 0.9 })),
     ...ct.map((c) => ({ url: `${BASE}/contracts/${c.slug}`, lastModified: new Date(), changeFrequency: "monthly" as const, priority: 0.7 })),
     ...ar.map((a) => ({ url: `${BASE}/knowledge/${a.slug}`, lastModified: a.updatedAt, changeFrequency: "monthly" as const, priority: 0.7 })),
+    ...qa.map((q) => ({ url: `${BASE}/qa/${q.slug}`, lastModified: new Date(), changeFrequency: "monthly" as const, priority: 0.6 })),
   ];
 }
