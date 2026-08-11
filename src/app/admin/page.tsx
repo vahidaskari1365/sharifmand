@@ -126,9 +126,12 @@ export default async function AdminPage() {
               {[
                 { label: "مدیریت مقالات", href: "/admin/articles", icon: "book" as const },
                 { label: "مقاله جدید", href: "/admin/articles/new", icon: "plus" as const },
-                { label: "وکلای سایت", href: "/lawyers", icon: "badge" as const },
-                { label: "قراردادها", href: "/contracts", icon: "file" as const },
-                { label: "دانشنامه حقوقی", href: "/knowledge", icon: "sparkles" as const },
+                { label: "مدیریت وکلا", href: "/admin/lawyers", icon: "badge" as const },
+                { label: "مدیریت قراردادها", href: "/admin/contracts", icon: "file" as const },
+                { label: "مدیریت پرسش و پاسخ", href: "/admin/qa", icon: "chat" as const },
+                { label: "مدیریت پرونده‌ها", href: "/admin/cases", icon: "folder" as const },
+                { label: "مدیریت مشاوره‌ها", href: "/admin/consultations", icon: "calendar" as const },
+                { label: "مدیریت تیکت‌ها", href: "/admin/tickets", icon: "mail" as const },
                 { label: "بازگشت به سایت", href: "/", icon: "home" as const },
               ].map((m) => (
                 <Link key={m.label + m.href} href={m.href}>

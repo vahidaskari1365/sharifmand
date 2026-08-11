@@ -8,6 +8,7 @@ import { Card, Badge } from "@/components/ui";
 import { Icon } from "@/components/icons";
 import { faNum } from "@/lib/data";
 import { getCurrentUser } from "@/lib/user-auth";
+import DocumentsManager from "@/components/documents-manager";
 export const metadata: Metadata = {
   title: "پنل موکل — داشبورد حقوقی من",
   description: "مدیریت پرونده‌ها، مشاوره‌ها، اسناد، قراردادها، پرداخت‌ها و پیام‌های شما.",
@@ -171,6 +172,11 @@ export default async function ClientDashboard() {
           </div>
         </Card>
       </div>
+      {/* Documents */}
+      <Card hover={false}>
+        <h2 className="flex items-center gap-2 font-bold text-foreground"><Icon name="document" className="h-5 w-5 text-success" /> اسناد و مدارک من</h2>
+        <DocumentsManager />
+      </Card>
     </DashboardShell>
   );
 }

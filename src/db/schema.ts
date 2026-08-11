@@ -195,3 +195,14 @@ export const users = pgTable("app_users", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 export type User = typeof users.$inferSelect;
+
+/* ------------------------------ Documents (client uploads) ------------------------------ */
+export const documents = pgTable("app_documents", {
+  id: serial("id").primaryKey(),
+  userPhone: text("user_phone").notNull(),
+  name: text("name").notNull(),
+  type: text("type").notNull().default("مدرک"),
+  size: integer("size").notNull().default(0),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+export type Document = typeof documents.$inferSelect;
