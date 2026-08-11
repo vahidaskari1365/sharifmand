@@ -6,6 +6,26 @@ const globalForDb = globalThis as typeof globalThis & {
   __arenaNextJsDrizzleDb?: ReturnType<typeof drizzle>;
 };
 
+let noopWarned = false;
+
+function createNoopDb(): any {
+  // Chainable no-op that resolves every awaited query to [] — lets pages
+  // render (with empty DB sections) when DATABASE_URL is not configured,
+  // instead of crashing the whole site with a 500.
+  return new Proxy(function () {}, {
+    get(_t, prop) {
+      if (prop === "then") {
+        return (resolve: (v: unknown) => void) => resolve([]);
+      }
+      if (prop === Symbol.toStringTag) return "NoopDb";
+      return createNoopDb();
+    },
+    apply() {
+      return createNoopDb();
+    },
+  });
+}
+
 function getPool(): Pool {
   const databaseUrl = process.env.DATABASE_URL;
   if (!databaseUrl) {
@@ -21,7 +41,20 @@ function getPool(): Pool {
 }
 
 function getDb() {
-  globalForDb.__arenaNextJsDrizzleDb ??= drizzle(getPool());
+  if (!globalForDb.__arenaNextJsDrizzleDb) {
+    if (!process.env.DATABASE_URL) {
+      if (!noopWarned) {
+        noopWarned = true;
+        // eslint-disable-next-line no-console
+        console.warn(
+          "[sharifmand] DATABASE_URL is not set — running in degraded mode (DB sections will be empty).",
+        );
+      }
+      globalForDb.__arenaNextJsDrizzleDb = createNoopDb() as ReturnType<typeof drizzle>;
+    } else {
+      globalForDb.__arenaNextJsDrizzleDb = drizzle(getPool());
+    }
+  }
   return globalForDb.__arenaNextJsDrizzleDb;
 }
 
