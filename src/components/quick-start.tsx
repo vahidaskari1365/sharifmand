@@ -168,7 +168,7 @@ export function QuickStart() {
                 >
                   {step === 0 ? "" : "→ قبلی"}
                 </button>
-                <Button onClick={() => setStep((s) => s + 1)} disabled={!canNext} icon="arrow" className="rotate-180">
+                <Button onClick={() => setStep((s) => s + 1)} disabled={!canNext} icon="arrow">
                   ادامه
                 </Button>
               </div>
