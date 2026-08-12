@@ -212,8 +212,8 @@ export default async function HomePage() {
         <Container>
           <Reveal>
             <div className="relative overflow-hidden rounded-3xl border border-border bg-gradient-to-br from-primary to-primary-hover p-8 text-primary-foreground sm:p-12">
-              <div className="pointer-events-none absolute -left-20 -top-20 h-64 w-64 rounded-full bg-accent/25 blur-3xl animate-drift" />
-              <div className="pointer-events-none absolute -bottom-24 -right-10 h-72 w-72 rounded-full bg-white/10 blur-3xl animate-drift-rev" />
+              <div className="pointer-events-none absolute -left-20 -top-20 h-64 w-64 rounded-full bg-accent/25 blur-3xl" />
+              <div className="pointer-events-none absolute -bottom-24 -right-10 h-72 w-72 rounded-full bg-white/10 blur-3xl" />
               <div className="relative grid items-center gap-8 lg:grid-cols-[1.5fr_1fr]">
                 <div>
                   <span className="inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-xs font-semibold backdrop-blur">
@@ -342,7 +342,7 @@ export default async function HomePage() {
         <Container>
           <Reveal>
             <div className="relative overflow-hidden rounded-3xl border border-border bg-surface p-8 text-center card-shadow sm:p-12">
-              <div className="pointer-events-none absolute inset-0 aurora-band opacity-60" />
+              <div className="pointer-events-none absolute inset-0 opacity-50" style={{ background: "linear-gradient(110deg, color-mix(in oklab, var(--primary) 14%, transparent), color-mix(in oklab, var(--accent) 12%, transparent), color-mix(in oklab, var(--primary) 14%, transparent))" }} />
               <div className="relative">
                 <h2 className="text-2xl font-bold text-foreground sm:text-3xl">آماده‌اید مشکل حقوقی‌تان را حل کنید؟</h2>
                 <p className="mx-auto mt-3 max-w-xl text-muted">
