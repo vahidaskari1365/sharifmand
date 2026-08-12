@@ -21,8 +21,16 @@ export async function GET() {
       counts: { lawyers: l?.n ?? 0, articles: a?.n ?? 0, contracts: c?.n ?? 0, qa: q?.n ?? 0 },
     });
   } catch (e) {
+    const err = e as Error & { cause?: unknown; code?: string };
+    const cause = err.cause instanceof Error ? `${err.cause.message}${err.cause.cause instanceof Error ? ` // ${err.cause.cause.message}` : ""}` : String(err.cause ?? "");
     return NextResponse.json(
-      { ok: false, db: "error", error: e instanceof Error ? e.message.slice(0, 200) : "unknown" },
+      {
+        ok: false,
+        db: "error",
+        error: (err.message || "unknown").slice(0, 300),
+        code: err.code ?? null,
+        cause: cause.slice(0, 300),
+      },
       { status: 500 }
     );
   }
