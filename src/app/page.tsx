@@ -13,7 +13,7 @@ import { SERVICES, CONSULTATION_TYPES, faNum, faPrice } from "@/lib/data";
 import type { IconKey } from "@/lib/data";
 import { SPECIAL_SERVICES } from "@/lib/content";
 
-export const revalidate = 300;
+export const dynamic = "force-dynamic";
 
 const STATS_NUM: { to: number; decimals?: number; suffix?: string; label: string; icon: IconKey }[] = [
   { to: 1200, suffix: "+", label: "وکیل تأییدشده", icon: "badge" },

@@ -5,7 +5,7 @@ import { Container, Badge, EmptyState } from "@/components/ui";
 import { Icon } from "@/components/icons";
 import { CONTRACT_CATEGORIES, faPrice } from "@/lib/data";
 
-export const revalidate = 300;
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "کتابخانه قراردادها و سندهای حقوقی",

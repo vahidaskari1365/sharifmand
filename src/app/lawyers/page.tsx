@@ -8,7 +8,7 @@ import { LawyerCard } from "@/components/lawyer-card";
 import { LawyerFilters } from "@/components/lawyer-filters";
 import { SPECIALTIES, ALL_CITIES, ALL_PROVINCES, faNum } from "@/lib/data";
 
-export const revalidate = 300;
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata({
   searchParams,

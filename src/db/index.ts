@@ -36,6 +36,9 @@ function getPool(): Pool {
   }
   globalForDb.__arenaNextJsPostgresqlPool ??= new Pool({
     connectionString: databaseUrl,
+    max: 5,
+    connectionTimeoutMillis: 10_000,
+    idleTimeoutMillis: 30_000,
   });
   return globalForDb.__arenaNextJsPostgresqlPool;
 }

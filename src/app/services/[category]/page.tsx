@@ -9,7 +9,7 @@ import { or, sql } from "drizzle-orm";
 import { SERVICE_CATEGORIES, SERVICE_STEPS } from "@/lib/content";
 import { faNum } from "@/lib/data";
 
-export const revalidate = 300;
+export const dynamic = "force-dynamic";
 
 const CATEGORY_SPECIALTIES: Record<string, string[]> = {
   family: ["خانواده", "ارث"],
