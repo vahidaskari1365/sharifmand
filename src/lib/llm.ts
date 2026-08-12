@@ -2,10 +2,17 @@
 // LLM_API_KEY / LLM_BASE_URL / LLM_MODEL override; otherwise keyless Pollinations.
 
 const SYSTEM_LEGAL = `تو دستیار حقوقی شریف‌مند هستی — یک وکیل هوشمند فارسی‌زبان.
-به سوالات حقوقی کاربر به فارسی پاسخ بده؛ مختصر، دقیق و کاربردی.
+به سوالات حقوقی کاربر به فارسی روان و کامل پاسخ بده؛ مختصر، دقیق و کاربردی.
+پاسخ را حتماً به زبان فارسی بنویس و از هر کاراکتر غیرفارسی (چینی، کره‌ای، ژاپنی و غیره) خودداری کن.
 اگر پاسخ دقیق نیاز به مطالعه اسناد/قوانین دارد، بگو برای نظر قطعی با وکیل مشورت کند.
-هیچ‌وقت خودت را وکیل رسمی معرفی نکن و در پایان یادآوری کن: "این پاسخ جنبه اطلاع‌رسانی دارد و جایگزین مشاوره حقوقی رسمی نیست."`;
-
+هیچ​وقت خودت را وکیل رسمی معرفی نکن و در پایان یادآوری کن: "این پاسخ جنبه اطلاع‌رسانی دارد و جایگزین مشاوره حقوقی رسمی نیست."`;
+function sanitizePersian(text: string): string {
+  return text
+    // eslint-disable-next-line no-control-regex
+    .replace(/[\u3040-\u30ff\u3400-\u4dbf\u4e00-\u9fff\uac00-\ud7af\uff00-\uffef]/g, "")
+    .replace(/[ \t]{2,}/g, " ")
+    .trim();
+}
 async function post(base: string, body: unknown, key?: string, timeoutMs = 25000): Promise<string> {
   const ctrl = new AbortController();
   const t = setTimeout(() => ctrl.abort(), timeoutMs);
@@ -33,13 +40,13 @@ export async function askLLM(messages: { role: string; content: string }[], maxT
   const all = [{ role: "system", content: SYSTEM_LEGAL }, ...messages];
   if (key) {
     try {
-      return await post(`${base.replace(/\/$/, "")}/chat/completions`, { model, messages: all, max_tokens: maxTokens }, key);
+      return sanitizePersian(await post(`${base.replace(/\/$/, "")}/chat/completions`, { model, messages: all, max_tokens: maxTokens }, key));
     } catch {
       /* fall through to keyless */
     }
   }
   try {
-    return await post("https://text.pollinations.ai/", { messages: all, model: "openai", max_tokens: maxTokens, seed: 1 });
+    return sanitizePersian(await post("https://text.pollinations.ai/", { messages: all, model: "openai", max_tokens: maxTokens, seed: 1 }));
   } catch {
     return null;
   }

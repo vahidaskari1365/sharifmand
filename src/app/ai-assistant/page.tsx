@@ -201,11 +201,13 @@ function AIAssistantContent() {
   const [input, setInput] = useState(search.get("q") ?? "");
   const [loading, setLoading] = useState(false);
   const [guidance, setGuidance] = useState<{ g: LegalGuidance; echo: string } | null>(null);
+  const [llmAnswer, setLlmAnswer] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const [contractText, setContractText] = useState("");
   const [contractLoading, setContractLoading] = useState(false);
   const [contractResult, setContractResult] = useState<{ findings: ClauseFinding[]; riskScore: number } | null>(null);
+  const [contractAnalysis, setContractAnalysis] = useState<string | null>(null);
   const [contractError, setContractError] = useState<string | null>(null);
 
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -217,6 +219,7 @@ function AIAssistantContent() {
     setLoading(true);
     setError(null);
     setGuidance(null);
+    setLlmAnswer(null);
     try {
       const res = await fetch("/api/ai-assistant", {
         method: "POST",
@@ -225,7 +228,11 @@ function AIAssistantContent() {
       });
       const data = await res.json();
       if (!data.ok) throw new Error(data.error);
-      setGuidance({ g: data.guidance, echo: data.echo });
+      if (data.answer) {
+        setLlmAnswer(data.answer);
+      } else {
+        setGuidance({ g: data.guidance, echo: data.echo });
+      }
     } catch (e) {
       setError(e instanceof Error ? e.message : "خطا در ارتباط با سرور");
     } finally {
@@ -238,6 +245,7 @@ function AIAssistantContent() {
     setContractLoading(true);
     setContractError(null);
     setContractResult(null);
+    setContractAnalysis(null);
     try {
       const res = await fetch("/api/ai-assistant", {
         method: "POST",
@@ -246,7 +254,11 @@ function AIAssistantContent() {
       });
       const data = await res.json();
       if (!data.ok) throw new Error(data.error);
-      setContractResult({ findings: data.findings, riskScore: data.riskScore });
+      if (data.analysis) {
+        setContractAnalysis(data.analysis);
+      } else {
+        setContractResult({ findings: data.findings, riskScore: data.riskScore });
+      }
     } catch (e) {
       setContractError(e instanceof Error ? e.message : "خطا در تحلیل");
     } finally {
@@ -351,12 +363,27 @@ function AIAssistantContent() {
                 </div>
               )}
 
-              {loading && !guidance && (
+              {loading && !guidance && !llmAnswer && (
                 <Card hover={false} className="flex items-center gap-3">
                   <span className="h-3 w-3 animate-pulse-dot rounded-full bg-primary" />
                   <span className="h-3 w-3 animate-pulse-dot rounded-full bg-primary" style={{ animationDelay: "0.2s" }} />
                   <span className="h-3 w-3 animate-pulse-dot rounded-full bg-primary" style={{ animationDelay: "0.4s" }} />
                   <span className="text-sm text-muted">دستیار در حال تحلیل موضوع شماست…</span>
+                </Card>
+              )}
+
+              {llmAnswer && (
+                <Card hover={false} className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-accent-soft text-accent">
+                      <Icon name="sparkles" className="h-4 w-4" />
+                    </span>
+                    <span className="text-sm font-bold text-foreground">پاسخ دستیار هوشمند</span>
+                  </div>
+                  <p className="whitespace-pre-line text-sm leading-7 text-foreground-soft">{llmAnswer}</p>
+                  <p className="border-t border-border pt-3 text-xs text-muted">
+                    این پاسخ توسط هوش مصنوعی تولید شده و جنبه اطلاع‌رسانی دارد؛ برای اقدام حقوقی با وکیل متخصص مشورت کنید.
+                  </p>
                 </Card>
               )}
 
@@ -400,7 +427,22 @@ function AIAssistantContent() {
                 </div>
               )}
 
-              {!contractResult && (
+              {contractAnalysis && (
+                <Card hover={false} className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-accent-soft text-accent">
+                      <Icon name="sparkles" className="h-4 w-4" />
+                    </span>
+                    <span className="text-sm font-bold text-foreground">تحلیل هوشمند قرارداد</span>
+                  </div>
+                  <p className="whitespace-pre-line text-sm leading-7 text-foreground-soft">{contractAnalysis}</p>
+                  <p className="border-t border-border pt-3 text-xs text-muted">
+                    این تحلیل توسط هوش مصنوعی تولید شده و جایگزین نظر کارشناسی وکیل نیست.
+                  </p>
+                </Card>
+              )}
+
+              {!contractResult && !contractAnalysis && !contractLoading && (
                 <div className="rounded-2xl border border-dashed border-border bg-surface-2/50 p-6 text-center text-sm text-muted">
                   متن قرارداد را وارد کنید تا تحلیل هوشمند بندهای پرریسک، جریمه‌ها و ابهامات نمایش داده شود.
                 </div>
