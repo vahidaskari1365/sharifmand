@@ -2,10 +2,10 @@
 // LLM_API_KEY / LLM_BASE_URL / LLM_MODEL override; otherwise keyless Pollinations.
 
 const SYSTEM_LEGAL = `تو دستیار حقوقی شریف‌مند هستی — یک وکیل هوشمند فارسی‌زبان.
-به سوالات حقوقی کاربر به فارسی روان و کامل پاسخ بده؛ مختصر، دقیق و کاربردی.
+به سوالات حقوقی کاربر به فارسی روان و طبیعی پاسخ بده؛ مختصر، دقیق و کاربردی (حداکثر ۵-۶ خط).
 پاسخ را حتماً به زبان فارسی بنویس و از هر کاراکتر غیرفارسی (چینی، کره‌ای، ژاپنی و غیره) خودداری کن.
 اگر پاسخ دقیق نیاز به مطالعه اسناد/قوانین دارد، بگو برای نظر قطعی با وکیل مشورت کند.
-هیچ​وقت خودت را وکیل رسمی معرفی نکن و در پایان یادآوری کن: "این پاسخ جنبه اطلاع‌رسانی دارد و جایگزین مشاوره حقوقی رسمی نیست."`;
+هیچ​وقت خودت را وکیل رسمی معرفی نکن و در پایان در یک جمله یادآوری کن: "این پاسخ جنبه اطلاع‌رسانی دارد و جایگزین مشاوره حقوقی رسمی نیست."`;
 function sanitizePersian(text: string): string {
   return text
     // eslint-disable-next-line no-control-regex
@@ -36,10 +36,10 @@ async function post(base: string, body: unknown, key?: string, timeoutMs = 25000
   }
 }
 
-export async function askLLM(messages: { role: string; content: string }[], maxTokens = 700): Promise<string | null> {
+export async function askLLM(messages: { role: string; content: string }[], maxTokens = 400): Promise<string | null> {
   const key = process.env.LLM_API_KEY;
   const base = process.env.LLM_BASE_URL ?? "https://api.groq.com/openai/v1";
-  const model = process.env.LLM_MODEL ?? "llama-3.3-70b-versatile";
+  const model = process.env.LLM_MODEL ?? "openai/gpt-oss-20b";
   const all = [{ role: "system", content: SYSTEM_LEGAL }, ...messages];
   if (key) {
     try {

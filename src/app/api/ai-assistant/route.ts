@@ -14,14 +14,14 @@ export async function POST(req: Request) {
     if (!text) return NextResponse.json({ ok: false, error: "متن قرارداد خالی است." }, { status: 400 });
     const llm = await askLLM([
       { role: "user", content: `قرارداد زیر را تحلیل کن و نقاط ضعف، ریسک‌ها و بندهای مهم آن را به فارسی فهرست کن:\n\n${text.slice(0, 6000)}` },
-    ], 800);
+    ], 450);
     if (llm) return NextResponse.json({ ok: true, mode: "contract", source: "llm", analysis: llm });
     const result = analyzeContract(text);
     return NextResponse.json({ ok: true, mode: "contract", source: "local", ...result });
   }
   const query = (body.query ?? "").trim();
   if (!query) return NextResponse.json({ ok: false, error: "لطفاً سؤال خود را بنویسید." }, { status: 400 });
-  const llm = await askLLM([{ role: "user", content: query }], 700);
+  const llm = await askLLM([{ role: "user", content: query }], 400);
   if (llm) return NextResponse.json({ ok: true, mode: "guide", source: "llm", answer: llm, echo: query });
   const guidance = analyzeLegalQuery(query);
   return NextResponse.json({ ok: true, mode: "guide", source: "local", guidance, echo: query });
