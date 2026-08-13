@@ -102,6 +102,14 @@ export function HomeHero() {
           <div className="mt-4">
             <p className="mb-2 text-xs font-medium text-muted">یا یک موضوع را انتخاب کنید:</p>
             <div className="flex flex-wrap justify-center gap-2">
+              <button
+                type="button"
+                onClick={() => router.push("/ai-assistant")}
+                className="inline-flex items-center gap-1.5 rounded-full border border-accent/40 bg-accent-soft px-3 py-1.5 text-xs font-bold text-accent transition-all duration-200 cursor-pointer hover:border-accent/60 hover:bg-[color-mix(in_oklab,var(--accent)_18%,transparent)] hover:shadow-sm"
+              >
+                <Icon name="sparkles" className="h-3.5 w-3.5" />
+                دستیار هوش مصنوعی
+              </button>
               {LEGAL_TOPICS.map((t) => {
                 const active = selected === t.label;
                 return (

@@ -74,53 +74,81 @@ export function Header() {
     >
       <Container className="flex h-16 items-center justify-between gap-4 lg:h-18">
         {/* Right (logo) — RTL */}
-        <Link href="/" className="shrink-0" aria-label="شریفمند — خانه">
+        <Link
+          href="/"
+          className="shrink-0 transition-opacity hover:opacity-85"
+          aria-label="شریفمند — خانه"
+          onClick={() => {
+            // Clicking the logo always goes home; if already there, scroll back to top.
+            if (pathname === "/") window.scrollTo({ top: 0, behavior: "smooth" });
+          }}
+        >
           <Logo />
         </Link>
 
         {/* Center nav */}
         <nav className="hidden lg:block" onMouseLeave={() => setOpenMenu(null)}>
           <ul className="flex items-center gap-1">
-            {NAV.map((item) => (
-              <li key={item.label} className="relative">
-                <button
-                  type="button"
-                  className="flex items-center gap-1 rounded-lg px-3 py-2 text-sm font-medium text-foreground-soft transition-colors hover:bg-surface-2 hover:text-foreground"
-                  onMouseEnter={() => setOpenMenu(item.children ? item.label : null)}
-                  onClick={() => setOpenMenu(openMenu === item.label ? null : item.label)}
-                  aria-expanded={openMenu === item.label}
-                >
-                  {item.label}
-                  {item.children && (
-                    <Icon name="check" className="h-3 w-3 rotate-90 opacity-60" />
-                  )}
-                </button>
-                {item.children && openMenu === item.label && (
-                  <div
-                    className="absolute right-0 top-full z-50 w-72 animate-scale-in pt-2"
+            {NAV.map((item) =>
+              item.children ? (
+                <li key={item.label} className="relative">
+                  <button
+                    type="button"
+                    className="flex items-center gap-1 rounded-lg px-3 py-2 text-sm font-medium text-foreground-soft transition-colors hover:bg-surface-2 hover:text-foreground"
                     onMouseEnter={() => setOpenMenu(item.label)}
+                    onClick={() => setOpenMenu(openMenu === item.label ? null : item.label)}
+                    aria-expanded={openMenu === item.label}
                   >
-                    <div className="overflow-hidden rounded-2xl border border-border bg-surface p-2 shadow-[var(--shadow-lift)]">
-                      {item.children.map((c) => (
-                        <Link
-                          key={c.label}
-                          href={c.href}
-                          className="flex items-start gap-3 rounded-xl p-2.5 transition-colors hover:bg-surface-2"
-                        >
-                          <span className="mt-0.5 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary-soft text-primary">
-                            <Icon name={childIcon(c.label)} className="h-4 w-4" />
-                          </span>
-                          <span className="flex flex-col">
-                            <span className="text-sm font-semibold text-foreground">{c.label}</span>
-                            {c.desc && <span className="text-xs text-muted">{c.desc}</span>}
-                          </span>
-                        </Link>
-                      ))}
+                    {item.label}
+                    <Icon name="check" className="h-3 w-3 rotate-90 opacity-60" />
+                  </button>
+                  {openMenu === item.label && (
+                    <div
+                      className="absolute right-0 top-full z-50 w-72 animate-scale-in pt-2"
+                      onMouseEnter={() => setOpenMenu(item.label)}
+                    >
+                      <div className="overflow-hidden rounded-2xl border border-border bg-surface p-2 shadow-[var(--shadow-lift)]">
+                        {item.children.map((c) => (
+                          <Link
+                            key={c.label}
+                            href={c.href}
+                            className="flex items-start gap-3 rounded-xl p-2.5 transition-colors hover:bg-surface-2"
+                          >
+                            <span className="mt-0.5 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary-soft text-primary">
+                              <Icon name={childIcon(c.label)} className="h-4 w-4" />
+                            </span>
+                            <span className="flex flex-col">
+                              <span className="text-sm font-semibold text-foreground">{c.label}</span>
+                              {c.desc && <span className="text-xs text-muted">{c.desc}</span>}
+                            </span>
+                          </Link>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                )}
-              </li>
-            ))}
+                  )}
+                </li>
+              ) : (
+                <li key={item.label}>
+                  <Link
+                    href={item.href}
+                    onClick={() => setOpenMenu(null)}
+                    aria-current={pathname === item.href ? "page" : undefined}
+                    className={
+                      item.ai
+                        ? "ml-1 inline-flex items-center gap-1.5 rounded-full border border-accent/30 bg-accent-soft px-3.5 py-1.5 text-sm font-bold text-accent shadow-sm transition-all duration-200 hover:-translate-y-px hover:border-accent/50 hover:bg-[color-mix(in_oklab,var(--accent)_18%,transparent)] hover:shadow-md"
+                        : `flex items-center gap-1 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+                            pathname === item.href
+                              ? "bg-surface-2 text-foreground"
+                              : "text-foreground-soft hover:bg-surface-2 hover:text-foreground"
+                          }`
+                    }
+                  >
+                    {item.ai && <Icon name="sparkles" className="h-4 w-4" />}
+                    {item.label}
+                  </Link>
+                </li>
+              )
+            )}
           </ul>
         </nav>
 
@@ -156,10 +184,10 @@ export function Header() {
         <div className="lg:hidden">
           <div className="glass border-t border-border px-4 py-4">
             <nav className="flex flex-col gap-1">
-              {NAV.map((item) => (
-                <div key={item.label} className="border-b border-border pb-2 last:border-0">
-                  <p className="px-2 pb-1 pt-2 text-xs font-bold uppercase tracking-wide text-muted">{item.label}</p>
-                  {item.children && (
+              {NAV.map((item) =>
+                item.children ? (
+                  <div key={item.label} className="border-b border-border pb-2 last:border-0">
+                    <p className="px-2 pb-1 pt-2 text-xs font-bold uppercase tracking-wide text-muted">{item.label}</p>
                     <div className="flex flex-col">
                       {item.children.map((c) => (
                         <Link
@@ -172,9 +200,22 @@ export function Header() {
                         </Link>
                       ))}
                     </div>
-                  )}
-                </div>
-              ))}
+                  </div>
+                ) : (
+                  <Link
+                    key={item.label}
+                    href={item.href}
+                    className={
+                      item.ai
+                        ? "mb-2 flex items-center justify-center gap-2 rounded-xl border border-accent/30 bg-accent-soft px-3 py-3 text-sm font-bold text-accent"
+                        : "flex items-center gap-3 rounded-xl px-2 py-2.5 text-sm font-medium text-foreground-soft hover:bg-surface-2"
+                    }
+                  >
+                    {item.ai && <Icon name="sparkles" className="h-4 w-4" />}
+                    {item.label}
+                  </Link>
+                )
+              )}
             </nav>
             <div className="mt-4 flex flex-col gap-2">
               <Button href="/consultation" icon="calendar" className="w-full">رزرو مشاوره</Button>

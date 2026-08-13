@@ -99,6 +99,33 @@ function GuidanceView({ g, echo }: { g: LegalGuidance; echo: string }) {
         </div>
       </div>
 
+      {g.articles.length > 0 && (
+        <div className="rounded-2xl border border-[color-mix(in_oklab,var(--accent)_30%,transparent)] bg-accent-soft/50 p-5">
+          <div className="flex items-center gap-2">
+            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-accent text-accent-foreground">
+              <Icon name="landmark" className="h-4 w-4" />
+            </span>
+            <div>
+              <h4 className="text-sm font-bold text-foreground">مواد و تبصره‌های قانونی مرتبط</h4>
+              <p className="text-[11px] text-muted">متن مواد به‌صورت خلاصه‌شده ذکر شده است</p>
+            </div>
+          </div>
+          <ul className="mt-4 space-y-3">
+            {g.articles.map((a) => (
+              <li
+                key={a.ref}
+                className="rounded-xl border border-border/60 bg-surface/70 p-3.5 sm:flex sm:items-start sm:gap-3"
+              >
+                <span className="mb-1.5 inline-flex shrink-0 items-center rounded-full bg-accent px-2.5 py-1 text-[11px] font-bold text-accent-foreground sm:mb-0">
+                  {a.ref}
+                </span>
+                <p className="text-sm leading-6 text-foreground-soft">{a.text}</p>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
       {g.laws.length > 0 && (
         <div className="rounded-2xl border border-border bg-surface-2 p-5">
           <h4 className="flex items-center gap-2 text-sm font-bold text-foreground">
@@ -287,8 +314,8 @@ function AIAssistantContent() {
               سؤال حقوقی‌تان را بپرسید یا قراردادتان را تحلیل کنید
             </h1>
             <p className="mt-3 text-sm leading-7 text-muted">
-              دستیار شریفمند موضوع را تشخیص می‌دهد، مراحل و مدارک را توضیح می‌دهد و شما را به وکیل
-              متخصص وصل می‌کند. هوشمند، سریع و محرمانه.
+              دستیار شریفمند موضوع را تشخیص می‌دهد، مراحل و مدارک را توضیح می‌دهد و با استناد به
+              مواد و تبصره‌های قانونی مرتبط، شما را به وکیل متخصص وصل می‌کند. هوشمند، سریع و محرمانه.
             </p>
           </div>
         </Container>

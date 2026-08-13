@@ -105,7 +105,13 @@ export const TRUST_BADGES: { title: string; desc: string; icon: IconKey }[] = [
 ];
 
 /* ---------------- Main navigation ---------------- */
-export const NAV: { label: string; href: string; children?: { label: string; href: string; desc?: string }[] }[] = [
+export const NAV: {
+  label: string;
+  href: string;
+  /** Highlights this tab as the AI assistant (special accent styling). */
+  ai?: boolean;
+  children?: { label: string; href: string; desc?: string }[];
+}[] = [
   {
     label: "خدمات حقوقی",
     href: "/services",
@@ -151,6 +157,7 @@ export const NAV: { label: string; href: string; children?: { label: string; hre
     ],
   },
   { label: "برای کسب‌وکارها", href: "/business" },
+  { label: "دستیار هوش مصنوعی", href: "/ai-assistant", ai: true },
 ];
 
 /* ---------------- Contract categories ---------------- */
