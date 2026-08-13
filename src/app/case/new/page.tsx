@@ -32,7 +32,7 @@ function NewCaseContent() {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [result, setResult] = useState<{ caseNumber: string; stageIndex: number } | null>(null);
+  const [result, setResult] = useState<{ caseNumber: string; trackingToken: string; stageIndex: number } | null>(null);
 
   const set = (k: keyof typeof form, v: string) => setForm((f) => ({ ...f, [k]: v }));
 
@@ -51,7 +51,7 @@ function NewCaseContent() {
       });
       const data = await res.json();
       if (!data.ok) throw new Error(data.error);
-      setResult({ caseNumber: data.caseNumber, stageIndex: data.stageIndex });
+      setResult({ caseNumber: data.caseNumber, trackingToken: data.trackingToken, stageIndex: data.stageIndex });
       window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (e) {
       setError(e instanceof Error ? e.message : "خطا در ثبت پرونده");
@@ -76,6 +76,7 @@ function NewCaseContent() {
             <p className="mt-2 text-sm leading-7 text-muted">
               پرونده‌ای با شماره <span className="font-bold text-primary" dir="ltr">{result.caseNumber}</span> ایجاد شد.
               کارشناسان شریفمند آن را بررسی و وکلای مرتبط را معرفی می‌کنند.
+              <br />کد پیگیری محرمانه: <span className="font-mono font-bold text-primary" dir="ltr">{result.trackingToken}</span>
             </p>
           </div>
 

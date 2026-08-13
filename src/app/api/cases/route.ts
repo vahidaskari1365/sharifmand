@@ -1,78 +1,15 @@
+import { randomBytes } from "crypto";
 import { NextResponse } from "next/server";
 import { db } from "@/db";
 import { cases } from "@/db/schema";
-import { faNum } from "@/lib/data";
-
+import { isAdmin } from "@/lib/admin-auth";
+import { phone, rateLimit, readJson, text, validPhone } from "@/lib/api-security";
 export const runtime = "nodejs";
-
-const STAGES = [
-  "ثبت اولیه",
-  "بررسی مدارک",
-  "تنظیم دادخواست",
-  "ثبت در دادگاه",
-  "تعیین شعبه",
-  "جلسه اول",
-  "صدور رأی",
-  "تجدیدنظر",
-];
-
+const STAGES = ["ثبت اولیه", "بررسی مدارک", "تنظیم دادخواست", "ثبت در دادگاه", "تعیین شعبه", "جلسه اول", "صدور رأی", "تجدیدنظر", "در دادگاه/دادسرا", "مرحله اجرا"];
 export async function POST(req: Request) {
-  let body: {
-    subject?: string;
-    description?: string;
-    city?: string;
-    stage?: string;
-    budget?: string;
-    name?: string;
-    phone?: string;
-  };
-  try {
-    body = await req.json();
-  } catch {
-    return NextResponse.json({ ok: false, error: "درخواست نامعتبر" }, { status: 400 });
-  }
-
-  const { subject, description, city, stage, budget, name, phone } = body;
-
-  if (!subject || !description || !city || !name || !phone) {
-    return NextResponse.json(
-      { ok: false, error: "لطفاً موضوع، شرح ماجرا، شهر و اطلاعات تماس را کامل وارد کنید." },
-      { status: 422 },
-    );
-  }
-
-  const phoneOk = /^0?9\d{9}$/.test(phone.replace(/\s|-/g, ""));
-  if (!phoneOk) {
-    return NextResponse.json(
-      { ok: false, error: "شماره موبایل معتبر نیست (مثال: 09123456789)." },
-      { status: 422 },
-    );
-  }
-
-  const caseNumber = "1258-" + Math.floor(1000 + Math.random() * 9000);
-
-  await db.insert(cases).values({
-    caseNumber,
-    subject,
-    description,
-    city,
-    stage: stage || "ثبت اولیه",
-    budget: budget || null,
-    contactName: name,
-    contactPhone: phone,
-    status: "new",
-  });
-
-  return NextResponse.json({
-    ok: true,
-    caseNumber,
-    stageIndex: STAGES.indexOf(stage || "ثبت اولیه") === -1 ? 0 : STAGES.indexOf(stage || "ثبت اولیه"),
-    stages: STAGES,
-    message: "پرونده شما ثبت شد و در دست بررسی کارشناسان قرار گرفت.",
-  });
+ const body=await readJson(req,32_768); const limited=rateLimit(req,"cases",5,60*60_000); if(limited)return limited;
+ const subject=text(body?.subject,160),description=text(body?.description,12_000),city=text(body?.city,100),name=text(body?.name,120), mobile=phone(body?.phone), stage=text(body?.stage,100) || "ثبت اولیه", budget=text(body?.budget,100);
+ if(!subject||!description||!city||!name||!validPhone(mobile)||!STAGES.includes(stage)) return NextResponse.json({ok:false,error:"اطلاعات پرونده معتبر نیست."},{status:422});
+ try { const caseNumber=`SHF-${randomBytes(6).toString("hex").toUpperCase()}`; const trackingToken=randomBytes(32).toString("base64url"); await db.insert(cases).values({caseNumber,trackingToken,subject,description,city,stage,budget:budget||null,contactName:name,contactPhone:mobile,status:"new"}); return NextResponse.json({ok:true,caseNumber,trackingToken,stageIndex:STAGES.indexOf(stage),stages:STAGES,message:"پرونده شما ثبت شد. کد پیگیری را در جای امن نگه دارید."}); } catch { return NextResponse.json({ok:false,error:"ثبت پرونده انجام نشد."},{status:500}); }
 }
-
-export async function GET() {
-  const rows = await db.select().from(cases);
-  return NextResponse.json({ ok: true, count: faNum(String(rows.length)), cases: rows.slice(0, 20) });
-}
+export async function GET() { if(!(await isAdmin())) return NextResponse.json({ok:false,error:"unauthorized"},{status:401}); try { const rows=await db.select({id:cases.id,caseNumber:cases.caseNumber,subject:cases.subject,city:cases.city,stage:cases.stage,status:cases.status,createdAt:cases.createdAt}).from(cases).limit(200); return NextResponse.json({ok:true,cases:rows}); } catch { return NextResponse.json({ok:false,error:"خطای داخلی رخ داد."},{status:500}); } }

@@ -11,7 +11,7 @@ const STEPS = ["نوع پرونده", "شرح ماجرا", "شهر و مرحله
 
 export default function CreateCasePage() {
   const [step, setStep] = useState(0);
-  const [done, setDone] = useState<string | null>(null);
+  const [done, setDone] = useState<{ caseNumber: string; trackingToken: string } | null>(null);
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [f, setF] = useState({ subject: "", description: "", city: "", stage: "ثبت اولیه", name: "", phone: "" });
@@ -28,7 +28,7 @@ export default function CreateCasePage() {
       const res = await fetch("/api/cases", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(f) });
       const data = await res.json();
       if (!data.ok) throw new Error(data.error);
-      setDone(data.caseNumber);
+      setDone({ caseNumber: data.caseNumber, trackingToken: data.trackingToken });
       window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (e) {
       setErr(e instanceof Error ? e.message : "خطا در ثبت");
@@ -43,8 +43,9 @@ export default function CreateCasePage() {
         <div className="mx-auto max-w-lg text-center">
           <span className="mx-auto inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-success/15 text-success"><Icon name="check" className="h-8 w-8" /></span>
           <h1 className="mt-5 text-2xl font-extrabold text-foreground">پرونده ثبت شد!</h1>
-          <p className="mt-2 text-sm text-muted">شماره پرونده: <span className="font-bold text-primary" dir="ltr">{done}</span></p>
+          <p className="mt-2 text-sm text-muted">شماره پرونده: <span className="font-bold text-primary" dir="ltr">{done.caseNumber}</span></p>
           <p className="mt-1 text-sm text-muted">کارشناسان بررسی و وکلای مرتبط را معرفی می‌کنند.</p>
+          <p className="mt-4 text-xs text-muted">کد پیگیری محرمانه:</p><p className="font-mono break-all text-sm font-bold text-primary" dir="ltr">{done.trackingToken}</p>
           <div className="mt-6 flex flex-wrap justify-center gap-3">
             <Button href="/dashboard/cases/1258-0001">مشاهده در پنل</Button>
             <Button href="/consultation" variant="outline" icon="chat">مشاوره فوری</Button>

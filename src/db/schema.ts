@@ -127,7 +127,8 @@ export const qaQuestions = pgTable("qa_questions", {
 /* ------------------------------ Cases ------------------------------ */
 export const cases = pgTable("cases", {
   id: serial("id").primaryKey(),
-  caseNumber: text("case_number").notNull(),
+  caseNumber: text("case_number").notNull().unique(),
+  trackingToken: text("tracking_token").notNull().unique(),
   subject: text("subject").notNull(),
   description: text("description").notNull(),
   city: text("city").notNull(),
@@ -158,7 +159,7 @@ export const consultations = pgTable("consultations", {
 /* ------------------------------ Support tickets ------------------------------ */
 export const tickets = pgTable("tickets", {
   id: serial("id").primaryKey(),
-  ticketNumber: text("ticket_number").notNull(),
+  ticketNumber: text("ticket_number").notNull().unique(),
   name: text("name").notNull(),
   phone: text("phone").notNull(),
   category: text("category").notNull(),

@@ -1,31 +1,3 @@
-import { NextResponse } from "next/server";
-import { db } from "@/db";
-import { tickets } from "@/db/schema";
-
-export const runtime = "nodejs";
-
-export async function POST(req: Request) {
-  let body: { name?: string; phone?: string; category?: string; message?: string };
-  try {
-    body = await req.json();
-  } catch {
-    return NextResponse.json({ ok: false, error: "درخواست نامعتبر" }, { status: 400 });
-  }
-
-  const { name, phone, category, message } = body;
-  if (!name || !phone || !message) {
-    return NextResponse.json({ ok: false, error: "لطفاً نام، تماس و متن را وارد کنید." }, { status: 422 });
-  }
-
-  const ticketNo = "T-" + Math.floor(10000 + Math.random() * 90000);
-  await db.insert(tickets).values({
-    ticketNumber: ticketNo,
-    name,
-    phone,
-    category: category || "سایر",
-    message,
-    status: "open",
-  });
-
-  return NextResponse.json({ ok: true, ticketNo, message: "تیکت شما ثبت شد. تیم پشتیبانی به‌زودی پاسخ می‌دهد." });
-}
+import { randomBytes } from "crypto"; import { NextResponse } from "next/server"; import { db } from "@/db"; import { tickets } from "@/db/schema"; import { phone, rateLimit, readJson, text, validPhone } from "@/lib/api-security";
+export const runtime="nodejs";
+export async function POST(req:Request) { const body=await readJson(req,16_384), limited=rateLimit(req,"tickets",5,60*60_000); if(limited)return limited; const name=text(body?.name,120),mobile=phone(body?.phone),category=text(body?.category,80)||"سایر",message=text(body?.message,6000); if(!name||!validPhone(mobile)||!message)return NextResponse.json({ok:false,error:"اطلاعات تیکت معتبر نیست."},{status:422}); try { const ticketNo=`T-${randomBytes(8).toString("hex").toUpperCase()}`; await db.insert(tickets).values({ticketNumber:ticketNo,name,phone:mobile,category,message,status:"open"}); return NextResponse.json({ok:true,ticketNo,message:"تیکت شما ثبت شد. تیم پشتیبانی به‌زودی پاسخ می‌دهد."}); } catch{return NextResponse.json({ok:false,error:"ثبت تیکت انجام نشد."},{status:500});} }
