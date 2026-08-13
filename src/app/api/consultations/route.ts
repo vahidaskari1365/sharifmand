@@ -3,6 +3,8 @@ import { db } from "@/db";
 import { consultations, lawyers } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { faNum } from "@/lib/data";
+import { randomBytes } from "crypto";
+import { phone as normalizePhone, rateLimit, readJson, text, validPhone } from "@/lib/api-security";
 
 export const runtime = "nodejs";
 
@@ -28,12 +30,14 @@ export async function POST(req: Request) {
     time?: string;
   };
   try {
-    body = await req.json();
+    body = (await readJson(req, 16_384) ?? {}) as typeof body;
   } catch {
     return NextResponse.json({ ok: false, error: "درخواست نامعتبر" }, { status: 400 });
   }
 
-  const { lawyer, type, duration, name, phone, subject, date, time } = body;
+  const limited = rateLimit(req, "consultations", 5, 60 * 60_000); if (limited) return limited;
+  const { lawyer, type, duration, date, time } = body;
+  const name = text(body.name, 120); const phone = normalizePhone(body.phone); const subject = text(body.subject, 1000);
 
   if (!name || !phone || !subject || !type) {
     return NextResponse.json(
@@ -42,7 +46,7 @@ export async function POST(req: Request) {
     );
   }
 
-  const phoneOk = /^0?9\d{9}$/.test(phone.replace(/\s|-/g, ""));
+  const phoneOk = validPhone(phone);
   if (!phoneOk) {
     return NextResponse.json(
       { ok: false, error: "شماره موبایل معتبر نیست (مثال: 09123456789)." },
@@ -68,7 +72,7 @@ export async function POST(req: Request) {
     }
   }
 
-  const ticketNo = "C-" + Math.floor(100000 + Math.random() * 900000);
+  const ticketNo = "C-" + randomBytes(8).toString("hex").toUpperCase();
 
   await db.insert(consultations).values({
     lawyerName,

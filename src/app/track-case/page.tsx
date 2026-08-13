@@ -56,16 +56,14 @@ export default function TrackCasePage() {
           {result?.found && result.caseData && (
             <Card hover={false} className="mt-4">
               <div className="flex items-center justify-between">
-                <h3 className="font-bold text-foreground">{result.caseData.subject}</h3>
+                <h3 className="font-bold text-foreground">وضعیت پرونده</h3>
                 <span className="font-mono text-xs text-muted" dir="ltr">{result.caseData.caseNumber}</span>
               </div>
               <div className="mt-3 grid gap-2 text-sm">
                 <div className="flex justify-between rounded-xl bg-surface-2/60 p-3"><span className="text-muted">وضعیت</span><Badge tone="primary">{FA[result.caseData.status] ?? result.caseData.status}</Badge></div>
-                <div className="flex justify-between rounded-xl bg-surface-2/60 p-3"><span className="text-muted">مرحله</span><span className="font-bold text-foreground">{result.caseData.stage}</span></div>
-                <div className="flex justify-between rounded-xl bg-surface-2/60 p-3"><span className="text-muted">دادگاه / شهر</span><span className="font-bold text-foreground">{result.caseData.city}</span></div>
-                {result.caseData.budget && <div className="flex justify-between rounded-xl bg-surface-2/60 p-3"><span className="text-muted">بودجه</span><span className="font-bold text-foreground">{result.caseData.budget}</span></div>}
+                <div className="flex justify-between rounded-xl bg-surface-2/60 p-3"><span className="text-muted">تاریخ ثبت</span><span className="font-bold text-foreground">{new Date(result.caseData.createdAt).toLocaleDateString("fa-IR")}</span></div>
               </div>
-              <p className="mt-3 text-xs text-muted">توضیحات: {result.caseData.description}</p>
+
             </Card>
           )}
         </div>

@@ -4,7 +4,11 @@ import { db } from "@/db";
 import { users } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
-const SECRET = process.env.AUTH_SECRET ?? "sharifmand-user-secret-v1";
+function secret(): string {
+  const value = process.env.AUTH_SECRET;
+  if (!value || value.length < 32) throw new Error("AUTH_SECRET must be configured with at least 32 characters");
+  return value;
+}
 const COOKIE = "sharifmand_user";
 const TTL_MS = 1000 * 60 * 60 * 24 * 30; // 30 days
 
@@ -35,7 +39,7 @@ function safeEq(a: string, b: string): boolean {
 
 export function signUserSession(userId: number, role: string): string {
   const payload = Buffer.from(JSON.stringify({ uid: userId, role, exp: Date.now() + TTL_MS })).toString("base64url");
-  const sig = createHmac("sha256", SECRET).update(payload).digest("base64url");
+  const sig = createHmac("sha256", secret()).update(payload).digest("base64url");
   return `${payload}.${sig}`;
 }
 
@@ -43,7 +47,7 @@ export function verifyUserSession(token: string | undefined): { uid: number; rol
   if (!token) return null;
   const [payload, sig] = token.split(".");
   if (!payload || !sig) return null;
-  const expected = createHmac("sha256", SECRET).update(payload).digest("base64url");
+  const expected = createHmac("sha256", secret()).update(payload).digest("base64url");
   if (!safeEq(sig, expected)) return null;
   try {
     const data = JSON.parse(Buffer.from(payload, "base64url").toString("utf8"));
