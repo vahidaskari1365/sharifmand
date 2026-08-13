@@ -241,8 +241,8 @@ export default async function HomePage() {
                   <div className="mt-3 space-y-2 text-xs">
                     <p className="rounded-xl rounded-tr-sm bg-white/15 px-3 py-2">مستأجر من سه ماه اجاره نداده، چه کنم؟</p>
                     <p className="rounded-xl rounded-tl-sm bg-white/25 px-3 py-2 leading-6">
-                      موضوع ملک و اجاره شناسایی شد. مدارک لازم: قرارداد اجاره و گواهی پرداخت. مراحل: اظهارنامه،
-                      دادخواست تخلیه، اجرای حکم…
+                      موضوع ملک و اجاره شناسایی شد. طبق ماده ۴۹۴ قانون مدنی و ماده ۲ قانون روابط موجر و مستأجر
+                      ۱۳۷۶، مدارک لازم: قرارداد اجاره و گواهی پرداخت. مراحل: اظهارنامه، دادخواست تخلیه، اجرای حکم…
                     </p>
                   </div>
                 </div>

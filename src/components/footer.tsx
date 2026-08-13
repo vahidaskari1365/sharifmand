@@ -61,7 +61,13 @@ export function Footer() {
       <Container className="py-12">
         <div className="grid gap-10 lg:grid-cols-[1.6fr_repeat(4,1fr)]">
           <div>
-            <Logo />
+            <Link
+              href="/"
+              aria-label="شریفمند — صفحه اصلی"
+              className="inline-block transition-opacity hover:opacity-85"
+            >
+              <Logo />
+            </Link>
             <p className="mt-4 max-w-xs text-sm leading-7 text-muted">
               شریفمند، پلتفرم هوشمند خدمات حقوقی؛ از پیدا کردن وکیل متخصص و رزرو مشاوره تا مدیریت
               پرونده، تنظیم اسناد و دستیار حقوقی هوش مصنوعی — همه در یک‌جا.

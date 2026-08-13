@@ -1,27 +1,65 @@
 "use client";
 
+import Image from "next/image";
 import { Icon } from "./icons";
 
 /**
  * Hero background for a legal platform.
- * Calm and premium: soft page wash, faint grid, subtle icon accents and
- * floating trust cards. No spinning/decorative-only animation (per
- * UI/UX Pro Max: motion must convey meaning; decorative animation is an
- * anti-pattern). All decorative layers are pointer-events-none.
+ * A premium, on-brand photographic scene (scales of justice, courthouse
+ * columns, law books — navy & gold) with a light and a dark variant, blended
+ * into the page with theme-aware gradient washes so the centered content
+ * stays readable in both themes. All decorative layers are
+ * pointer-events-none; motion stays purposeful (scroll cue only).
  */
 export function HeroScene() {
   return (
     <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
-      <div className="page-wash absolute inset-0" />
+      {/* Photographic background — light theme */}
+      <Image
+        src="/hero-bg-light.jpg"
+        alt=""
+        fill
+        priority
+        sizes="100vw"
+        className="object-cover object-center dark:hidden"
+      />
+      {/* Photographic background — dark theme */}
+      <Image
+        src="/hero-bg-dark.jpg"
+        alt=""
+        fill
+        loading="eager"
+        sizes="100vw"
+        className="hidden object-cover object-center dark:block"
+      />
 
-      {/* Soft aurora washes (static, no drift) */}
-      <div className="absolute -top-24 right-[12%] h-80 w-80 opacity-40">
+      {/* Theme-aware readability wash: blends the photo into the page
+          (fades at top under the transparent header and at the bottom
+          into the next section) while keeping the middle visible. */}
+      <div
+        className="absolute inset-0"
+        style={{
+          background:
+            "linear-gradient(180deg, var(--background) 0%, color-mix(in oklab, var(--background) 22%, transparent) 18%, color-mix(in oklab, var(--background) 8%, transparent) 48%, color-mix(in oklab, var(--background) 12%, transparent) 70%, color-mix(in oklab, var(--background) 55%, transparent) 86%, var(--background) 100%)",
+        }}
+      />
+      {/* Soft side vignettes for text focus */}
+      <div
+        className="absolute inset-0"
+        style={{
+          background:
+            "radial-gradient(120% 90% at 50% 42%, transparent 40%, color-mix(in oklab, var(--background) 55%, transparent) 100%)",
+        }}
+      />
+
+      {/* Soft aurora washes (static, no drift) — on-brand color harmony */}
+      <div className="absolute -top-24 right-[12%] h-80 w-80 opacity-30">
         <div
           className="h-full w-full rounded-full blur-[80px]"
           style={{ background: "radial-gradient(closest-side, var(--primary), transparent)" }}
         />
       </div>
-      <div className="absolute top-10 left-[8%] h-72 w-72 opacity-30">
+      <div className="absolute top-10 left-[8%] h-72 w-72 opacity-20">
         <div
           className="h-full w-full rounded-full blur-[80px]"
           style={{ background: "radial-gradient(closest-side, var(--accent), transparent)" }}
@@ -31,22 +69,11 @@ export function HeroScene() {
       {/* Faint grid */}
       <div className="hero-grid absolute inset-0" />
 
-      {/* Subtle legal icon accents — static, large, low opacity */}
-      <div className="absolute left-[6%] top-[18%] hidden opacity-[0.06] lg:block">
-        <Icon name="gavel" className="h-36 w-36 text-primary" />
-      </div>
-      <div className="absolute right-[7%] top-[62%] hidden opacity-[0.05] xl:block">
-        <Icon name="landmark" className="h-44 w-44 text-primary" />
-      </div>
-      <div className="absolute bottom-[10%] left-[12%] hidden opacity-[0.05] xl:block">
-        <Icon name="document" className="h-32 w-32 text-primary" />
-      </div>
-
       {/* Floating glass trust cards */}
       <FloatCard className="right-[5%] top-[20%] hidden lg:flex" icon="badge" title="وکیل تأییدشده" sub="احراز هویتشده" tone="primary" />
       <FloatCard className="left-[4%] top-[30%] hidden lg:flex" icon="star" title="۴٫۸ از ۵" sub="امتیاز کاربران" tone="accent" />
-      <FloatCard className="right-[9%] bottom-[14%] hidden xl:flex" icon="bolt" title="پاسخ سریع" sub="کمتر از ۳۰ دقیقه" tone="success" />
-      <FloatCard className="left-[7%] bottom-[18%] hidden xl:flex" icon="lock" title="اطلاعات محرمانه" sub="رمزنگاریشده" tone="primary" />
+      <FloatCard className="right-[9%] bottom-[16%] hidden xl:flex" icon="bolt" title="پاسخ سریع" sub="کمتر از ۳۰ دقیقه" tone="success" />
+      <FloatCard className="left-[7%] bottom-[20%] hidden xl:flex" icon="lock" title="اطلاعات محرمانه" sub="رمزنگاریشده" tone="primary" />
 
       {/* Scroll cue */}
       <div className="absolute bottom-5 left-1/2 hidden -translate-x-1/2 flex-col items-center gap-1 md:flex">
