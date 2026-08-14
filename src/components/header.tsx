@@ -46,6 +46,13 @@ export function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
+  // بستن منوها هنگام تغییر مسیر — الگوی «تنظیم state در حین رندر» بدون effect
+  const [prevPathname, setPrevPathname] = useState(pathname);
+  if (prevPathname !== pathname) {
+    setPrevPathname(pathname);
+    setMobileOpen(false);
+    setOpenMenu(null);
+  }
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
@@ -53,11 +60,6 @@ export function Header() {
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
-
-  useEffect(() => {
-    setMobileOpen(false);
-    setOpenMenu(null);
-  }, [pathname]);
 
   useEffect(() => {
     document.body.style.overflow = mobileOpen ? "hidden" : "";

@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import Link from "next/link";
 import { Container, Button } from "./ui";
 import { Icon } from "./icons";
 import type { IconKey } from "@/lib/data";
@@ -11,7 +12,8 @@ export function DashboardShell({
 }: {
   role: "موکل" | "وکیل";
   title: string;
-  nav: { label: string; icon: IconKey; active?: boolean; badge?: string }[];
+  /** href-when-present = real link; otherwise a plain label (لا Buttons مرده) */
+  nav: { label: string; icon: IconKey; active?: boolean; badge?: string; href?: string }[];
   children: ReactNode;
 }) {
   return (
@@ -32,23 +34,31 @@ export function DashboardShell({
       <div className="grid gap-6 lg:grid-cols-[240px_1fr]">
         <aside className="lg:sticky lg:top-20 lg:self-start">
           <nav className="flex gap-2 overflow-x-auto rounded-2xl border border-border bg-surface p-2 lg:flex-col">
-            {nav.map((n) => (
-              <button
-                key={n.label}
-                type="button"
-                className={`flex shrink-0 items-center gap-2.5 rounded-xl px-3.5 py-2.5 text-sm font-medium transition-colors ${
-                  n.active ? "bg-primary text-primary-foreground" : "text-foreground-soft hover:bg-surface-2"
-                }`}
-              >
-                <Icon name={n.icon} className="h-4 w-4" />
-                {n.label}
-                {n.badge && (
-                  <span className={`mr-auto rounded-full px-1.5 py-0.5 text-[10px] font-bold ${n.active ? "bg-white/20" : "bg-accent text-accent-foreground"}`}>
-                    {n.badge}
-                  </span>
-                )}
-              </button>
-            ))}
+            {nav.map((n) => {
+              const cls = `flex shrink-0 items-center gap-2.5 rounded-xl px-3.5 py-2.5 text-sm font-medium transition-colors ${
+                n.active ? "bg-primary text-primary-foreground" : "text-foreground-soft hover:bg-surface-2"
+              }`;
+              const inner = (
+                <>
+                  <Icon name={n.icon} className="h-4 w-4" />
+                  {n.label}
+                  {n.badge && (
+                    <span className={`mr-auto rounded-full px-1.5 py-0.5 text-[10px] font-bold ${n.active ? "bg-white/20" : "bg-accent text-accent-foreground"}`}>
+                      {n.badge}
+                    </span>
+                  )}
+                </>
+              );
+              return n.href ? (
+                <Link key={n.label} href={n.href} className={cls}>
+                  {inner}
+                </Link>
+              ) : (
+                <button key={n.label} type="button" className={cls}>
+                  {inner}
+                </button>
+              );
+            })}
           </nav>
         </aside>
 

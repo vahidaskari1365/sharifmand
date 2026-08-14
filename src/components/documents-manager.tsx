@@ -21,7 +21,7 @@ export default function DocumentsManager() {
       setLoading(false);
     }
   }, []);
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => { queueMicrotask(() => void load()); }, [load]);
 
   const add = async () => {
     if (!name.trim()) { setMsg("نام سند را وارد کنید."); return; }

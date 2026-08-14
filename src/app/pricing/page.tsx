@@ -3,6 +3,7 @@ import { Container, Button, Badge, Card } from "@/components/ui";
 import { Icon } from "@/components/icons";
 import { faPrice, faNum } from "@/lib/data";
 import type { IconKey } from "@/lib/data";
+import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "تعرفه خدمات و فروشگاه خدمات حقوقی",
@@ -55,7 +56,7 @@ export default function PricingPage() {
       <section className="border-b border-border bg-gradient-to-b from-surface-2/60 to-background py-8">
         <Container>
           <nav className="flex items-center gap-1.5 text-xs text-muted">
-            <a href="/" className="hover:text-primary">خانه</a>
+            <Link href="/" className="hover:text-primary">خانه</Link>
             <Icon name="chevron" className="h-3 w-3 rotate-180" />
             <span className="text-foreground-soft">تعرفه خدمات</span>
           </nav>

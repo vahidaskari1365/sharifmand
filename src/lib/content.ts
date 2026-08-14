@@ -108,7 +108,7 @@ export const SPECIAL_SERVICES: { title: string; desc: string; icon: IconKey; hre
   { title: "بررسی قرارداد", desc: "تحلیل هوشمند + وکیل", icon: "file", href: "/contracts/review" },
   { title: "تحلیل پرونده", desc: "ارزیابی اولیه پرونده شما", icon: "folder", href: "/ai-assistant" },
   { title: "تنظیم سند", desc: "قرارداد، دادخواست، شکواییه", icon: "document", href: "/contracts/builder" },
-  { title: "درخواست وکیل", desc: "پرونده را ثبت کنید", icon: "user", href: "/cases/create" },
+  { title: "درخواست وکیل", desc: "پرونده را ثبت کنید", icon: "user", href: "/case/new" },
 ];
 
 /* ----------------- Glossary (/glossary) ----------------- */

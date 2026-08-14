@@ -84,7 +84,7 @@ export default function ServicesPage() {
               <p className="mt-1 text-sm text-muted">پرونده‌تان را ثبت کنید تا کارشناسان بهترین مسیر را پیشنهاد دهند.</p>
             </div>
             <div className="flex shrink-0 flex-wrap justify-center gap-3">
-              <Button href="/cases/create" icon="folder">ثبت پرونده</Button>
+              <Button href="/case/new" icon="folder">ثبت پرونده</Button>
               <Button href="/ai-assistant" variant="outline" icon="sparkles">پرسیدن از دستیار</Button>
             </div>
           </div>

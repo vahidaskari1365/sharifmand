@@ -9,7 +9,7 @@ const COLS: { title: string; links: { label: string; href: string }[] }[] = [
     links: [
       { label: "همه خدمات", href: "/services" },
       { label: "مشاوره آنلاین", href: "/consultation" },
-      { label: "رزرو مشاوره", href: "/booking" },
+      { label: "رزرو مشاوره", href: "/consultation" },
       { label: "قراردادساز", href: "/contracts/builder" },
       { label: "بررسی قرارداد", href: "/contracts/review" },
       { label: "فرم‌های حقوقی", href: "/legal-forms" },
@@ -51,7 +51,7 @@ const COLS: { title: string; links: { label: string; href: string }[] }[] = [
 const FEATURES: { icon: IconKey; label: string }[] = [
   { icon: "badge", label: "وکلای تأییدشده" },
   { icon: "lock", label: "محرمانگی اطلاعات" },
-  { icon: "shield", label: "تضمین بازگشت وجه" },
+  { icon: "shield", label: "بازگشت وجه طبق سیاست شفاف" },
   { icon: "balance", label: "حل اختلاف شفاف" },
 ];
 

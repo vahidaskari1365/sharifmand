@@ -6,6 +6,7 @@ import { eq } from "drizzle-orm";
 import { Container, Button, Badge, Card } from "@/components/ui";
 import { Icon } from "@/components/icons";
 import { faNum } from "@/lib/data";
+import Link from "next/link";
 
 export const dynamic = "force-dynamic";
 
@@ -61,9 +62,9 @@ export default async function ArticlePage({
         <section className="border-b border-border bg-gradient-to-b from-surface-2/60 to-background py-8">
           <Container>
             <nav className="flex flex-wrap items-center gap-1.5 text-xs text-muted">
-              <a href="/" className="hover:text-primary">خانه</a>
+              <Link href="/" className="hover:text-primary">خانه</Link>
               <Icon name="chevron" className="h-3 w-3 rotate-180" />
-              <a href="/knowledge" className="hover:text-primary">دانش حقوقی</a>
+              <Link href="/knowledge" className="hover:text-primary">دانش حقوقی</Link>
               <Icon name="chevron" className="h-3 w-3 rotate-180" />
               <span className="text-foreground-soft">{a.category}</span>
             </nav>

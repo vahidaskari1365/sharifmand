@@ -8,6 +8,7 @@ import {
   contracts,
   articles,
   qaQuestions,
+  lawyerAvailability,
 } from "@/db/schema";
 import { sql } from "drizzle-orm";
 
@@ -102,6 +103,25 @@ const DDL = [
   `CREATE TABLE IF NOT EXISTS page_views (id SERIAL PRIMARY KEY, path TEXT NOT NULL UNIQUE, views INTEGER NOT NULL DEFAULT 0, last_seen TIMESTAMP NOT NULL DEFAULT now())`,
   `CREATE TABLE IF NOT EXISTS app_users (id SERIAL PRIMARY KEY, name TEXT NOT NULL, phone TEXT NOT NULL UNIQUE, email TEXT UNIQUE, password_hash TEXT NOT NULL, role TEXT NOT NULL DEFAULT 'client', created_at TIMESTAMP NOT NULL DEFAULT now())`,
   `CREATE TABLE IF NOT EXISTS app_documents (id SERIAL PRIMARY KEY, user_phone TEXT NOT NULL, name TEXT NOT NULL, type TEXT NOT NULL DEFAULT 'مدرک', size INTEGER NOT NULL DEFAULT 0, created_at TIMESTAMP NOT NULL DEFAULT now())`,
+  /* --- Additive, idempotent hardening (safe on both fresh and existing DBs) --- */
+  `ALTER TABLE consultations ADD COLUMN IF NOT EXISTS starts_at TIMESTAMP`,
+  `ALTER TABLE consultations ADD COLUMN IF NOT EXISTS payment_ref TEXT`,
+  `ALTER TABLE cases ADD COLUMN IF NOT EXISTS tracking_token TEXT`,
+  `CREATE UNIQUE INDEX IF NOT EXISTS cases_case_number_uniq ON cases (case_number)`,
+  `CREATE UNIQUE INDEX IF NOT EXISTS cases_tracking_token_uniq ON cases (tracking_token) WHERE tracking_token IS NOT NULL`,
+  `DO $$ BEGIN ALTER TYPE consultation_status ADD VALUE IF NOT EXISTS 'payment_pending'; EXCEPTION WHEN undefined_object THEN null; END $$`,
+  `DO $$ BEGIN ALTER TYPE consultation_status ADD VALUE IF NOT EXISTS 'paid'; EXCEPTION WHEN undefined_object THEN null; END $$`,
+  `DO $$ BEGIN ALTER TYPE consultation_status ADD VALUE IF NOT EXISTS 'scheduled'; EXCEPTION WHEN undefined_object THEN null; END $$`,
+  `DO $$ BEGIN ALTER TYPE consultation_status ADD VALUE IF NOT EXISTS 'in_progress'; EXCEPTION WHEN undefined_object THEN null; END $$`,
+  `DO $$ BEGIN ALTER TYPE consultation_status ADD VALUE IF NOT EXISTS 'expired'; EXCEPTION WHEN undefined_object THEN null; END $$`,
+  `DO $$ BEGIN ALTER TYPE consultation_status ADD VALUE IF NOT EXISTS 'refunded'; EXCEPTION WHEN undefined_object THEN null; END $$`,
+  `CREATE TABLE IF NOT EXISTS lawyer_availability (id SERIAL PRIMARY KEY, lawyer_id INTEGER NOT NULL REFERENCES lawyers(id) ON DELETE CASCADE, weekday INTEGER NOT NULL, start_min INTEGER NOT NULL, end_min INTEGER NOT NULL)`,
+  `CREATE UNIQUE INDEX IF NOT EXISTS lawyer_availability_rule_uniq ON lawyer_availability (lawyer_id, weekday, start_min)`,
+  `CREATE TABLE IF NOT EXISTS payments (id SERIAL PRIMARY KEY, reference TEXT NOT NULL UNIQUE, order_type TEXT NOT NULL DEFAULT 'consultation', consultation_id INTEGER REFERENCES consultations(id) ON DELETE SET NULL, amount INTEGER NOT NULL, provider TEXT NOT NULL DEFAULT 'manual', status TEXT NOT NULL DEFAULT 'initiated', created_at TIMESTAMP NOT NULL DEFAULT now(), verified_at TIMESTAMP)`,
+  `CREATE TABLE IF NOT EXISTS qa_submissions (id SERIAL PRIMARY KEY, name TEXT NOT NULL, phone TEXT, question TEXT NOT NULL, status TEXT NOT NULL DEFAULT 'pending_review', created_at TIMESTAMP NOT NULL DEFAULT now())`,
+  `CREATE TABLE IF NOT EXISTS events (id SERIAL PRIMARY KEY, event TEXT NOT NULL, path TEXT NOT NULL DEFAULT '', created_at TIMESTAMP NOT NULL DEFAULT now())`,
+  /* Race-condition guard: one (lawyer, slot) pairing can never be booked twice. */
+  `CREATE UNIQUE INDEX IF NOT EXISTS consultations_timeslot_uniq ON consultations (lawyer_id, starts_at) WHERE starts_at IS NOT NULL AND lawyer_id IS NOT NULL`,
 ];
 
 export interface SeedCounts {
@@ -159,6 +179,27 @@ export async function ensureSeeded(): Promise<{ seeded: boolean; counts: SeedCou
     try {
       await db.insert(articles).values(articleData).onConflictDoNothing({ target: articles.slug });
       await db.insert(qaQuestions).values(qaData).onConflictDoNothing({ target: qaQuestions.slug });
+    } catch {
+      /* non-fatal */
+    }
+    // Availability rules (شنبه تا پنجشنبه ۹ تا ۱۸ به وقت تهران) for lawyers
+    // that have none yet — the real basis of the booking calendar.
+    try {
+      const rules = lawyerData.flatMap((_, i) =>
+        [0, 1, 2, 3, 4].map((weekday) => ({
+          lawyerId: i + 1,
+          weekday,
+          startMin: 9 * 60,
+          endMin: 18 * 60,
+        })),
+      );
+      for (const rule of rules) {
+        await db
+          .insert(lawyerAvailability)
+          .values(rule)
+          .onConflictDoNothing()
+          .catch(() => {});
+      }
     } catch {
       /* non-fatal */
     }

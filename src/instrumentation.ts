@@ -6,11 +6,9 @@ export async function register() {
     const { ensureSeeded } = await import("./lib/auto-seed");
     const res = await ensureSeeded();
     if (res.seeded) {
-      // eslint-disable-next-line no-console
       console.log("[sharifmand] auto-seed: database provisioned with seed data.");
     }
   } catch (e) {
-    // eslint-disable-next-line no-console
     console.error("[sharifmand] auto-seed failed:", e);
   }
 }

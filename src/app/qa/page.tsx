@@ -6,6 +6,7 @@ import { Container, Badge } from "@/components/ui";
 import { Icon } from "@/components/icons";
 import { AskForm } from "@/components/ask-form";
 import { faNum } from "@/lib/data";
+import Link from "next/link";
 
 export const dynamic = "force-dynamic";
 
@@ -35,7 +36,7 @@ export default async function QaPage() {
       <section className="border-b border-border bg-gradient-to-b from-surface-2/60 to-background py-8">
         <Container>
           <nav className="flex items-center gap-1.5 text-xs text-muted">
-            <a href="/" className="hover:text-primary">خانه</a>
+            <Link href="/" className="hover:text-primary">خانه</Link>
             <Icon name="chevron" className="h-3 w-3 rotate-180" />
             <span className="text-foreground-soft">پرسش و پاسخ</span>
           </nav>
@@ -100,9 +101,9 @@ export default async function QaPage() {
               <Icon name="bolt" className="h-4 w-4 text-accent" /> پاسخ فوری می‌خواهید؟
             </h3>
             <p className="mt-1.5 text-xs leading-5 text-muted">برای پاسخ آنی و تخصصی، مشاوره آنلاین رزرو کنید.</p>
-            <a href="/consultation" className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary-hover">
+            <Link href="/consultation" className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary-hover">
               <Icon name="chat" className="h-4 w-4" /> رزرو مشاوره آنلاین
-            </a>
+            </Link>
           </div>
         </aside>
       </Container>

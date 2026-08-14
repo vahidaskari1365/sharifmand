@@ -1,12 +1,9 @@
 "use client";
 
 import { useTheme } from "./theme-provider";
-import { useEffect, useState } from "react";
 
 export function ThemeToggle({ compact = false }: { compact?: boolean }) {
-  const { theme, toggle } = useTheme();
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
+  const { theme, mounted, toggle } = useTheme();
 
   const isDark = theme === "dark";
 

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { PageHero } from "@/components/page-hero";
 import { Container, Card, Button } from "@/components/ui";
 import { Icon } from "@/components/icons";
+import Link from "next/link";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -81,7 +82,7 @@ export default function RegisterPage() {
             {role === "lawyer" && (
               <p className="mt-3 rounded-xl bg-accent-soft/60 p-3 text-xs leading-6 text-foreground-soft">پس از ثبت‌نام، اطلاعات حرفه‌ای و مدارک شما بررسی و پس از احراز هویت، پروفایل فعال می‌شود.</p>
             )}
-            <p className="mt-4 text-center text-sm text-muted">حساب دارید؟ <a href="/login" className="font-bold text-primary hover:text-primary-hover">ورود</a></p>
+            <p className="mt-4 text-center text-sm text-muted">حساب دارید؟ <Link href="/login" className="font-bold text-primary hover:text-primary-hover">ورود</Link></p>
           </Card>
         </div>
       </Container>

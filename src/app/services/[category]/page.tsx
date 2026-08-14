@@ -8,6 +8,7 @@ import { lawyers } from "@/db/schema";
 import { or, sql } from "drizzle-orm";
 import { SERVICE_CATEGORIES, SERVICE_STEPS } from "@/lib/content";
 import { faNum } from "@/lib/data";
+import Link from "next/link";
 
 export const dynamic = "force-dynamic";
 
@@ -71,7 +72,7 @@ export default async function ServiceCategoryPage({
       >
         <div className="flex flex-wrap gap-2">
           <Button href="/consultation" icon="chat">درخواست مشاوره</Button>
-          <Button href="/cases/create" variant="outline" icon="folder">ثبت پرونده</Button>
+          <Button href="/case/new" variant="outline" icon="folder">ثبت پرونده</Button>
         </div>
       </PageHero>
 
@@ -81,13 +82,13 @@ export default async function ServiceCategoryPage({
         <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {cat.sub.map((s, i) => (
             <Reveal key={s.name} delay={i * 50}>
-              <a href={s.href} className="group flex h-full flex-col rounded-2xl border border-border bg-surface p-5 card-shadow transition-all hover:-translate-y-1 hover:shadow-[var(--shadow-lift)]">
+              <Link href={s.href} className="group flex h-full flex-col rounded-2xl border border-border bg-surface p-5 card-shadow transition-all hover:-translate-y-1 hover:shadow-[var(--shadow-lift)]">
                 <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-accent-soft text-accent">
                   <Icon name={cat.icon} className="h-5 w-5" />
                 </span>
                 <h3 className="mt-3 text-sm font-bold text-foreground">{s.name}</h3>
                 <span className="mt-auto pt-4 text-xs font-semibold text-primary">شروع ←</span>
-              </a>
+              </Link>
             </Reveal>
           ))}
         </div>
@@ -127,7 +128,7 @@ export default async function ServiceCategoryPage({
           </div>
           <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {lawyersList.map((l) => (
-              <a key={l.id} href={`/lawyers/${l.slug}`} className="rounded-2xl border border-border bg-surface p-4 card-shadow transition-all hover:-translate-y-1 hover:shadow-[var(--shadow-lift)]">
+              <Link key={l.id} href={`/lawyers/${l.slug}`} className="rounded-2xl border border-border bg-surface p-4 card-shadow transition-all hover:-translate-y-1 hover:shadow-[var(--shadow-lift)]">
                 <div className="flex items-center gap-2">
                   <span className="inline-flex h-9 w-9 items-center justify-center rounded-xl text-xs font-bold text-white" style={{ background: l.avatarColor }}>{l.name.slice(0, 1)}</span>
                   <div className="min-w-0">
@@ -136,7 +137,7 @@ export default async function ServiceCategoryPage({
                   </div>
                 </div>
                 <div className="mt-2"><StarRating rating={l.rating} count={l.reviewCount} /></div>
-              </a>
+              </Link>
             ))}
           </div>
         </Container>
@@ -149,7 +150,7 @@ export default async function ServiceCategoryPage({
             <p className="mx-auto mt-2 max-w-lg text-sm text-white/85">همین حالا مشاوره رزرو کنید یا پرونده‌تان را ثبت نمایید.</p>
             <div className="mt-5 flex flex-wrap justify-center gap-3">
               <Button href="/consultation" variant="accent" icon="chat">رزرو مشاوره</Button>
-              <Button href="/cases/create" className="bg-white/15 text-white hover:bg-white/25" icon="folder">ثبت پرونده</Button>
+              <Button href="/case/new" className="bg-white/15 text-white hover:bg-white/25" icon="folder">ثبت پرونده</Button>
             </div>
           </div>
         </Reveal>

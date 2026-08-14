@@ -13,7 +13,6 @@ const SYSTEM_LEGAL = `تو دستیار حقوقی شریف‌مند هستی �
 هیچ​وقت خودت را وکیل رسمی معرفی نکن و در پایان در یک جمله یادآوری کن: "این پاسخ جنبه اطلاع‌رسانی دارد و جایگزین مشاوره حقوقی رسمی نیست."`;
 function sanitizePersian(text: string): string {
   return text
-    // eslint-disable-next-line no-control-regex
     .replace(
       /[\u0400-\u04ff\u0500-\u052f\u3040-\u30ff\u3400-\u4dbf\u4e00-\u9fff\uac00-\ud7af\u0400-\u04ff\u0590-\u05ff\u0370-\u03ff\u00c0-\u024f\uff00-\uffef]/g,
       "",

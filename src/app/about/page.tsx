@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { Container, Card, Badge, Stat } from "@/components/ui";
 import { Icon } from "@/components/icons";
-import { STATS } from "@/lib/data";
+import { getPlatformStats } from "@/lib/stats";
+import { faNum } from "@/lib/data";
+import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "درباره شریفمند",
@@ -25,7 +27,16 @@ const VALUES = [
   { title: "محرمانگی", desc: "حفاظت از اطلاعات شما با بالاترین استانداردهای امنیتی.", icon: "lock" as const },
 ];
 
-export default function AboutPage() {
+export const dynamic = "force-dynamic";
+
+export default async function AboutPage() {
+  const stats = await getPlatformStats();
+  const statItems = [
+    { value: stats.verifiedLawyers != null ? faNum(stats.verifiedLawyers) : "—", label: "وکیل تأییدشده", icon: "badge" as const },
+    { value: stats.registeredCases != null ? faNum(stats.registeredCases) : "—", label: "پرونده ثبت‌شده", icon: "folder" as const },
+    { value: stats.answeredQuestions != null ? faNum(stats.answeredQuestions) : "—", label: "پرسش حقوقی", icon: "chat" as const },
+    { value: stats.publishedArticles != null ? faNum(stats.publishedArticles) : "—", label: "مقاله منتشرشده", icon: "document" as const },
+  ];
   return (
     <>
       <section className="border-b border-border bg-gradient-to-b from-primary-soft/40 to-background py-12">
@@ -43,7 +54,7 @@ export default function AboutPage() {
 
       <Container className="py-12">
         <div className="grid grid-cols-2 gap-6 rounded-3xl border border-border bg-surface p-8 card-shadow sm:grid-cols-4">
-          {STATS.map((s) => <Stat key={s.label} {...s} />)}
+          {statItems.map((s) => <Stat key={s.label} {...s} />)}
         </div>
       </Container>
 
@@ -105,8 +116,8 @@ export default function AboutPage() {
           <h2 className="text-xl font-bold text-foreground">آماده‌اید به ما بپیوندید؟</h2>
           <p className="mx-auto mt-2 max-w-lg text-sm text-muted">چه به دنبال وکیل باشید چه عضو تیم وکلای شریفمند، خوشحال می‌شویم همراهتان باشیم.</p>
           <div className="mt-5 flex flex-wrap justify-center gap-3">
-            <a href="/lawyers" className="inline-flex h-11 items-center gap-2 rounded-xl bg-primary px-5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary-hover"><Icon name="search" className="h-4 w-4" /> پیدا کردن وکیل</a>
-            <a href="/contact" className="inline-flex h-11 items-center gap-2 rounded-xl border border-border-strong bg-surface px-5 text-sm font-semibold text-foreground transition-colors hover:bg-surface-2"><Icon name="mail" className="h-4 w-4" /> تماس با ما</a>
+            <Link href="/lawyers" className="inline-flex h-11 items-center gap-2 rounded-xl bg-primary px-5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary-hover"><Icon name="search" className="h-4 w-4" /> پیدا کردن وکیل</Link>
+            <Link href="/contact" className="inline-flex h-11 items-center gap-2 rounded-xl border border-border-strong bg-surface px-5 text-sm font-semibold text-foreground transition-colors hover:bg-surface-2"><Icon name="mail" className="h-4 w-4" /> تماس با ما</Link>
           </div>
         </div>
       </Container>
