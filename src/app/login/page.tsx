@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { PageHero } from "@/components/page-hero";
 import { Container, Card, Button } from "@/components/ui";
+import Link from "next/link";
 export default function LoginPage() {
   const router = useRouter();
   const [identifier, setIdentifier] = useState("");
@@ -53,7 +54,7 @@ export default function LoginPage() {
               <Button type="submit" disabled={loading} className="w-full">{loading ? "در حال ورود..." : "ورود"}</Button>
               <p className="text-center text-xs text-foreground-soft">
                 حساب ندارید؟{" "}
-                <a href="/register" className="font-bold text-primary hover:underline">ثبت‌نام کنید</a>
+                <Link href="/register" className="font-bold text-primary hover:underline">ثبت‌نام کنید</Link>
               </p>
             </form>
           </Card>

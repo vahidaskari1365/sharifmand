@@ -1,32 +1,33 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Icon } from "./icons";
 import { Button } from "./ui";
 import { HeroScene } from "./hero-scene";
 import { LEGAL_TOPICS } from "@/lib/data";
+import { trackEvent } from "@/lib/analytics";
 
 export function HomeHero() {
   const router = useRouter();
   const [selected, setSelected] = useState<string | null>(null);
   const [query, setQuery] = useState("");
 
-  const topicRoutes: Record<string, string> = {
-    طلاق: "/lawyers?sp=خانواده", مهریه: "/lawyers?sp=خانواده", "نفقه و حضانت": "/lawyers?sp=خانواده",
-    ارث: "/lawyers?sp=ارث", چک: "/lawyers?sp=چک و اسناد", "ملک و اجاره": "/lawyers?sp=ملک",
-    قرارداد: "/contracts", کیفری: "/lawyers?sp=کیفری", "تصرف عدوانی": "/lawyers?sp=ملک",
-    شرکت: "/pricing", مالیات: "/lawyers?sp=مالیاتی", کار: "/lawyers?sp=کار",
-    سرقفلی: "/lawyers?sp=تجارت", مهاجرت: "/lawyers?sp=مهاجرت",
-  };
+  useEffect(() => {
+    trackEvent("landing_view");
+  }, []);
 
   const go = () => {
     if (query.trim()) {
       router.push(`/ai-assistant?q=${encodeURIComponent(query.trim())}`);
       return;
     }
-    if (selected && topicRoutes[selected]) router.push(topicRoutes[selected]);
-    else router.push("/lawyers");
+    if (selected) {
+      // انتخاب موضوع → شروع مسیر با همان موضوع در موتور تصمیم‌گیری
+      router.push(`/?topic=${encodeURIComponent(selected)}#quickstart`);
+      return;
+    }
+    router.push("/#quickstart");
   };
 
   return (
@@ -39,18 +40,17 @@ export function HomeHero() {
             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-success opacity-60" />
             <span className="relative inline-flex h-2 w-2 rounded-full bg-success" />
           </span>
-          بیش از ۱٬۲۰۰ وکیل تأییدشده، همین حالا آنلاین
+          وکیل پایه یک دادگستری با پروانه راستی‌آزمایی‌شده
         </span>
 
         <h1
           className="animate-fade-up mt-6 text-balance text-4xl font-extrabold leading-[1.18] tracking-tight text-foreground sm:text-5xl md:text-6xl"
           style={{ animationDelay: "0.08s" }}
         >
-          هر مشکل حقوقی،
-          <br className="hidden sm:block" /> یک{" "}
+          مشکل{" "}
           <span className="relative inline-block">
             <span className="bg-gradient-to-l from-primary via-accent to-primary bg-clip-text text-transparent">
-              راه‌حل مطمئن
+              حقوقی‌تان
             </span>
             <svg
               className="absolute -bottom-2 right-0 h-3 w-full text-accent/50"
@@ -61,16 +61,29 @@ export function HomeHero() {
               <path d="M2 9C40 3 160 3 198 9" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
             </svg>
           </span>{" "}
-          دارد
+          چیست؟
         </h1>
 
         <p
           className="animate-fade-up mx-auto mt-6 max-w-xl text-base leading-8 text-muted sm:text-lg"
           style={{ animationDelay: "0.16s" }}
         >
-          از وکیل‌یابی و مشاوره آنلاین تا ثبت پرونده و تنظیم قرارداد؛ شریفمند با تیمی از وکلای
-          پایه یک دادگستری، با آرامش و اطمینان کنار توست.
+          در چند سؤال کوتاه، مسیر مطمئن برایت را پیدا می‌کنیم — از راهنمایی رایگان تا وکیل متخصص.
+          بدون هزینه پنهان، بدون موظف شدن به ثبت‌نام.
         </p>
+
+        {/* Primary decision CTAs */}
+        <div
+          className="animate-fade-up mt-7 flex flex-wrap items-center justify-center gap-3"
+          style={{ animationDelay: "0.2s" }}
+        >
+          <Button href="/#quickstart" size="lg" icon="arrow" className="shadow-[var(--shadow-lift)]">
+            شروع مسیر من
+          </Button>
+          <Button href="/lawyers" size="lg" variant="outline" icon="search">
+            مستقیماً وکیل پیدا می‌کنم
+          </Button>
+        </div>
 
         {/* The main question box */}
         <div
@@ -108,7 +121,7 @@ export function HomeHero() {
                 className="inline-flex items-center gap-1.5 rounded-full border border-accent/40 bg-accent-soft px-3 py-1.5 text-xs font-bold text-accent transition-all duration-200 cursor-pointer hover:border-accent/60 hover:bg-[color-mix(in_oklab,var(--accent)_18%,transparent)] hover:shadow-sm"
               >
                 <Icon name="sparkles" className="h-3.5 w-3.5" />
-                دستیار هوش مصنوعی
+                دستیار حقوقی
               </button>
               {LEGAL_TOPICS.map((t) => {
                 const active = selected === t.label;
@@ -141,22 +154,22 @@ export function HomeHero() {
                 موضوع انتخاب‌شده: <span className="font-bold text-primary">{selected}</span>
               </p>
               <Button onClick={go} size="sm" icon="arrow" className="mr-auto">
-                مشاهده بهترین اقدام
+                شروع مسیر با همین موضوع
               </Button>
             </div>
           )}
         </div>
 
-        {/* Trust row */}
+        {/* Trust row — only claims the product actually backs today */}
         <div
           className="animate-fade-up mt-7 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs text-muted"
           style={{ animationDelay: "0.32s" }}
         >
           {[
             { icon: "badge", text: "احراز هویت وکلا" },
-            { icon: "lock", text: "محرمانگی کامل" },
-            { icon: "shield", text: "تضمین بازگشت وجه" },
-            { icon: "star", text: "امتیاز ۴٫۸ از ۵" },
+            { icon: "lock", text: "محرمانگی اطلاعات" },
+            { icon: "shield", text: "بازگشت وجه طبق سیاست شفاف" },
+            { icon: "balance", text: "تعرفه شفاف پیش از تصمیم" },
           ].map((t) => (
             <span key={t.text} className="inline-flex items-center gap-1.5">
               <Icon name={t.icon as "badge"} className="h-4 w-4 text-accent" />

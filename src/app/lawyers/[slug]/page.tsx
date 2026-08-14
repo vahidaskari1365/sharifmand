@@ -6,6 +6,8 @@ import { eq, sql, desc, ne } from "drizzle-orm";
 import { Container, Button, StarRating, Avatar, Badge, Card, EmptyState } from "@/components/ui";
 import { Icon } from "@/components/icons";
 import { faNum, faPrice, relativeTime } from "@/lib/data";
+import { AvailabilityPanel } from "@/components/availability-panel";
+import Link from "next/link";
 
 export const dynamic = "force-dynamic";
 
@@ -81,9 +83,9 @@ export default async function LawyerProfile({
       <section className="border-b border-border bg-gradient-to-b from-primary-soft/40 to-background">
         <Container className="py-8">
           <nav className="flex flex-wrap items-center gap-1.5 text-xs text-muted">
-            <a href="/" className="hover:text-primary">خانه</a>
+            <Link href="/" className="hover:text-primary">خانه</Link>
             <Icon name="chevron" className="h-3 w-3 rotate-180" />
-            <a href="/lawyers" className="hover:text-primary">وکلا</a>
+            <Link href="/lawyers" className="hover:text-primary">وکلا</Link>
             <Icon name="chevron" className="h-3 w-3 rotate-180" />
             <span className="text-foreground-soft">{l.name}</span>
           </nav>
@@ -235,22 +237,18 @@ export default async function LawyerProfile({
 
           <Card hover={false}>
             <h3 className="flex items-center gap-2 font-bold text-foreground">
-              <Icon name="clock" className="h-4 w-4 text-accent" /> زمان‌های آزاد (نمونه)
+              <Icon name="clock" className="h-4 w-4 text-accent" /> زمان‌های آزاد
             </h3>
-            <div className="mt-3 grid grid-cols-3 gap-2">
-              {["شنبه ۱۰–۱۲", "شنبه ۱۶–۱۸", "یک‌شنبه ۱۰–۱۲", "دوشنبه ۱۴–۱۶", "سه‌شنبه ۱۰–۱۲", "چهارشنبه ۱۶–۱۸"].map((t) => (
-                <span key={t} className="rounded-lg border border-border bg-surface-2 px-2 py-2 text-center text-[11px] text-foreground-soft">
-                  {t}
-                </span>
-              ))}
+            <div className="mt-3">
+              <AvailabilityPanel lawyerSlug={l.slug} />
             </div>
           </Card>
 
           <Card hover={false} className="bg-primary-soft/50">
             <p className="flex items-start gap-2 text-xs leading-6 text-foreground-soft">
               <Icon name="shield" className="mt-0.5 h-4 w-4 shrink-0 text-success" />
-              هویت و پروانه این وکیل توسط کارشناسان شریفمند راستی‌آزمایی شده است. پرداخت شما امن و
-              تضمین بازگشت وجه است.
+              هویت و پروانه این وکیل توسط کارشناسان شریفمند راستی‌آزمایی شده است. مبلغ نهایی پیش از
+              پرداخت مشخص است و بازگشت وجه طبق سیاست شفاف انجام می‌شود.
             </p>
           </Card>
         </aside>

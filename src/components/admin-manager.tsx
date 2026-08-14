@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 type Row = Record<string, unknown> & { id: number };
@@ -85,19 +85,21 @@ export default function AdminManager({ resource }: { resource: string }) {
   const [error, setError] = useState("");
   const [saving, setSaving] = useState<number | null>(null);
 
-  const load = async () => {
+  const load = useCallback(async () => {
+    setLoading(true);
     try {
       const res = await fetch(`/api/admin/${resource}`);
       const data = await res.json();
       if (!data.ok) { setError("خطا در دریافت داده‌ها"); return; }
+      setError("");
       setRows(data.rows);
     } catch {
       setError("خطا در ارتباط");
     } finally {
       setLoading(false);
     }
-  };
-  useEffect(() => { load(); /* eslint-disable-next-line */ }, [resource]);
+  }, [resource]);
+  useEffect(() => { queueMicrotask(() => void load()); }, [load]);
 
   const changeStatus = async (row: Row, value: string) => {
     setSaving(row.id);
@@ -109,12 +111,12 @@ export default function AdminManager({ resource }: { resource: string }) {
       body: JSON.stringify({ id: row.id, changes }),
     });
     setSaving(null);
-    load();
+    void load();
   };
   const remove = async (row: Row) => {
     if (!confirm(`حذف این ردیف؟ (${String(row.id)})`)) return;
     await fetch(`/api/admin/${resource}?id=${row.id}`, { method: "DELETE" });
-    load();
+    void load();
   };
 
   if (loading) return <p className="p-6 text-sm text-muted">در حال بارگذاری…</p>;

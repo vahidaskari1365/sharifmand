@@ -71,7 +71,7 @@ export function HeroScene() {
 
       {/* Floating glass trust cards */}
       <FloatCard className="right-[5%] top-[20%] hidden lg:flex" icon="badge" title="وکیل تأییدشده" sub="احراز هویتشده" tone="primary" />
-      <FloatCard className="left-[4%] top-[30%] hidden lg:flex" icon="star" title="۴٫۸ از ۵" sub="امتیاز کاربران" tone="accent" />
+      <FloatCard className="left-[4%] top-[30%] hidden lg:flex" icon="badge" title="وکیل تأییدشده" sub="پروانه راستی‌آزمایی‌شده" tone="accent" />
       <FloatCard className="right-[9%] bottom-[16%] hidden xl:flex" icon="bolt" title="پاسخ سریع" sub="کمتر از ۳۰ دقیقه" tone="success" />
       <FloatCard className="left-[7%] bottom-[20%] hidden xl:flex" icon="lock" title="اطلاعات محرمانه" sub="رمزنگاریشده" tone="primary" />
 

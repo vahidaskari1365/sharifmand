@@ -7,6 +7,7 @@ import { Icon } from "@/components/icons";
 import { LawyerCard } from "@/components/lawyer-card";
 import { LawyerFilters } from "@/components/lawyer-filters";
 import { SPECIALTIES, ALL_CITIES, ALL_PROVINCES, faNum } from "@/lib/data";
+import Link from "next/link";
 
 export const dynamic = "force-dynamic";
 
@@ -78,7 +79,7 @@ export default async function LawyersPage({
       <section className="border-b border-border bg-gradient-to-b from-surface-2/60 to-background py-8">
         <Container>
           <nav className="flex items-center gap-1.5 text-xs text-muted">
-            <a href="/" className="hover:text-primary">خانه</a>
+            <Link href="/" className="hover:text-primary">خانه</Link>
             <Icon name="chevron" className="h-3 w-3 rotate-180" />
             <span className="text-foreground-soft">وکیل‌یابی</span>
           </nav>

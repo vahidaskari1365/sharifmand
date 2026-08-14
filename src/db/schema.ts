@@ -8,6 +8,7 @@ import {
   timestamp,
   pgEnum,
   numeric,
+  uniqueIndex,
 } from "drizzle-orm/pg-core";
 
 export const caseStatus = pgEnum("case_status", [
@@ -24,11 +25,21 @@ export const consultationType = pgEnum("consultation_type", [
   "video",
 ]);
 
+// State machine: pending → payment_pending → paid → confirmed → scheduled →
+// in_progress → completed, with cancelled / expired / refunded as terminal
+// fallback states. Older rows may still carry the shorthands (confirmed,
+// completed, cancelled) — all remain valid.
 export const consultationStatus = pgEnum("consultation_status", [
   "pending",
+  "payment_pending",
+  "paid",
   "confirmed",
+  "scheduled",
+  "in_progress",
   "completed",
   "cancelled",
+  "expired",
+  "refunded",
 ]);
 
 /* ------------------------------ Lawyers ------------------------------ */
@@ -151,6 +162,10 @@ export const consultations = pgTable("consultations", {
   clientPhone: text("client_phone").notNull(),
   subject: text("subject").notNull(),
   scheduledAt: text("scheduled_at"),
+  /** زمان نوبت رزروشده (UTC instant) — مبنای واقعی تداخل‌یابی */
+  startsAt: timestamp("starts_at"),
+  /** ارجاع رکورد پرداخت مرتبط (در صورت وجود) */
+  paymentRef: text("payment_ref"),
   price: numeric("price", { precision: 12, scale: 0 }).notNull().default("0"),
   status: consultationStatus("status").notNull().default("pending"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -196,6 +211,64 @@ export const users = pgTable("app_users", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 export type User = typeof users.$inferSelect;
+
+/* ------------------------------ Lawyer availability rules ------------------------------ */
+// Weekly bookable windows per lawyer (Asia/Tehran). Real slots are derived by
+// subtracting existing consultations — see src/lib/availability.ts.
+export const lawyerAvailability = pgTable(
+  "lawyer_availability",
+  {
+    id: serial("id").primaryKey(),
+    lawyerId: integer("lawyer_id")
+      .notNull()
+      .references(() => lawyers.id, { onDelete: "cascade" }),
+    /** 0=شنبه … 6=جمعه */
+    weekday: integer("weekday").notNull(),
+    /** دقیقه از شروع روز به وقت تهران */
+    startMin: integer("start_min").notNull(),
+    endMin: integer("end_min").notNull(),
+  },
+  (t) => [uniqueIndex("lawyer_availability_rule_uniq").on(t.lawyerId, t.weekday, t.startMin)],
+);
+export type LawyerAvailability = typeof lawyerAvailability.$inferSelect;
+
+/* ------------------------------ Payments (immutable financial facts) ------------------------------ */
+export const payments = pgTable("payments", {
+  id: serial("id").primaryKey(),
+  /** Idempotency key — unique; retries never create a second charge. */
+  reference: text("reference").notNull().unique(),
+  orderType: text("order_type").notNull().default("consultation"),
+  consultationId: integer("consultation_id")
+    .references(() => consultations.id, { onDelete: "set null" }),
+  /** مبلغ به تومان — عدد صحیح، بدون اعشار */
+  amount: integer("amount").notNull(),
+  provider: text("provider").notNull().default("manual"),
+  /** initiated | pending | verified | failed | refunded | manual_review */
+  status: text("status").notNull().default("initiated"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  verifiedAt: timestamp("verified_at"),
+});
+export type Payment = typeof payments.$inferSelect;
+
+/* ------------------------------ Q&A submissions (persisted, honestly acknowledged) ------------------------------ */
+export const qaSubmissions = pgTable("qa_submissions", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  phone: text("phone"),
+  question: text("question").notNull(),
+  status: text("status").notNull().default("pending_review"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+export type QaSubmission = typeof qaSubmissions.$inferSelect;
+
+/* ------------------------------ Analytics events ------------------------------ */
+export const events = pgTable("events", {
+  id: serial("id").primaryKey(),
+  event: text("event").notNull(),
+  path: text("path").notNull().default(""),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+export type AnalyticsEventRow = typeof events.$inferSelect;
 
 /* ------------------------------ Documents (client uploads) ------------------------------ */
 export const documents = pgTable("app_documents", {

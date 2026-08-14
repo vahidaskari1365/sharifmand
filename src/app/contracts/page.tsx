@@ -4,6 +4,7 @@ import { contracts } from "@/db/schema";
 import { Container, Badge, EmptyState } from "@/components/ui";
 import { Icon } from "@/components/icons";
 import { CONTRACT_CATEGORIES, faPrice } from "@/lib/data";
+import Link from "next/link";
 
 export const dynamic = "force-dynamic";
 
@@ -36,7 +37,7 @@ export default async function ContractsPage({
       <section className="border-b border-border bg-gradient-to-b from-surface-2/60 to-background py-8">
         <Container>
           <nav className="flex items-center gap-1.5 text-xs text-muted">
-            <a href="/" className="hover:text-primary">خانه</a>
+            <Link href="/" className="hover:text-primary">خانه</Link>
             <Icon name="chevron" className="h-3 w-3 rotate-180" />
             <span className="text-foreground-soft">کتابخانه قراردادها</span>
           </nav>
@@ -51,20 +52,20 @@ export default async function ContractsPage({
       <Container className="py-8">
         {/* Category filter */}
         <div className="mb-6 flex flex-wrap gap-2">
-          <a
+          <Link
             href="/contracts"
             className={`rounded-full border px-3.5 py-1.5 text-xs font-medium transition-colors ${!cat ? "border-primary bg-primary text-primary-foreground" : "border-border bg-surface text-foreground-soft hover:bg-surface-2"}`}
           >
             همه
-          </a>
+          </Link>
           {CONTRACT_CATEGORIES.map((c) => (
-            <a
+            <Link
               key={c}
               href={`/contracts?cat=${encodeURIComponent(c)}`}
               className={`rounded-full border px-3.5 py-1.5 text-xs font-medium transition-colors ${cat === c ? "border-primary bg-primary text-primary-foreground" : "border-border bg-surface text-foreground-soft hover:bg-surface-2"}`}
             >
               {c}
-            </a>
+            </Link>
           ))}
         </div>
 
@@ -73,7 +74,7 @@ export default async function ContractsPage({
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {list.map((c) => (
-              <a
+              <Link
                 key={c.slug}
                 href={`/contracts/${c.slug}`}
                 className="group flex flex-col rounded-2xl border border-border bg-surface p-5 card-shadow transition-all duration-200 hover:-translate-y-1 hover:border-primary/30 hover:shadow-[var(--shadow-lift)]"
@@ -96,7 +97,7 @@ export default async function ContractsPage({
                     <Icon name="arrow" className="h-3.5 w-3.5" />
                   </span>
                 </div>
-              </a>
+              </Link>
             ))}
           </div>
         )}

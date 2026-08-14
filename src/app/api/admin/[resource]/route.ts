@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { db } from "@/db";
-import { lawyers, contracts, qaQuestions, cases, consultations, tickets, articles } from "@/db/schema";
+import { lawyers, contracts, qaQuestions, cases, consultations, tickets, articles, qaSubmissions, payments, lawyerAvailability } from "@/db/schema";
 import { desc, eq } from "drizzle-orm";
 import { isAdmin } from "@/lib/admin-auth";
 
@@ -14,6 +14,9 @@ const TABLES: Record<string, { table: any; orderBy: any; searchCol?: any }> = {
   consultations: { table: consultations, orderBy: desc(consultations.createdAt), searchCol: consultations.clientName },
   tickets: { table: tickets, orderBy: desc(tickets.createdAt), searchCol: tickets.ticketNumber },
   articles: { table: articles, orderBy: desc(articles.publishedAt), searchCol: articles.title },
+  "qa-submissions": { table: qaSubmissions, orderBy: desc(qaSubmissions.createdAt), searchCol: qaSubmissions.question },
+  payments: { table: payments, orderBy: desc(payments.createdAt), searchCol: payments.reference },
+  availability: { table: lawyerAvailability, orderBy: null, searchCol: undefined },
 };
 
 export async function GET(req: Request, { params }: { params: Promise<{ resource: string }> }) {

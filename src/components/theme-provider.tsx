@@ -1,51 +1,47 @@
 "use client";
 
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useState,
-} from "react";
+import { createContext, useCallback, useContext, useState } from "react";
+import { useMounted } from "@/lib/use-mounted";
 
 type Theme = "light" | "dark";
 
 interface ThemeCtx {
   theme: Theme;
+  mounted: boolean;
   toggle: () => void;
   setTheme: (t: Theme) => void;
 }
 
 const Ctx = createContext<ThemeCtx | null>(null);
 
+/** مقدار اولیه از روی کلاس اعمال‌شده توسط اسکریپت boot در <head> خوانده می‌شود (بدون effect). */
+function readBootTheme(): Theme {
+  if (typeof document === "undefined") return "light";
+  return document.documentElement.classList.contains("dark") ? "dark" : "light";
+}
+
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setThemeState] = useState<Theme>("light");
-  const [mounted, setMounted] = useState(false);
+  const [theme, setThemeState] = useState<Theme>(readBootTheme);
+  const mounted = useMounted();
 
-  useEffect(() => {
-    const isDark = document.documentElement.classList.contains("dark");
-    setThemeState(isDark ? "dark" : "light");
-    setMounted(true);
-  }, []);
-
-  const apply = useCallback((t: Theme) => {
+  const setTheme = useCallback((t: Theme) => {
     const d = document.documentElement;
     d.classList.toggle("dark", t === "dark");
     d.style.colorScheme = t;
     try {
       localStorage.setItem("sharifmand-theme", t);
     } catch {
-      /* ignore */
+      /* storage unavailable */
     }
     setThemeState(t);
   }, []);
 
   const toggle = useCallback(() => {
-    apply(theme === "dark" ? "light" : "dark");
-  }, [theme, apply]);
+    setTheme(theme === "dark" ? "light" : "dark");
+  }, [theme, setTheme]);
 
   return (
-    <Ctx.Provider value={{ theme, toggle, setTheme: apply }}>
+    <Ctx.Provider value={{ theme, mounted, toggle, setTheme }}>
       {children}
     </Ctx.Provider>
   );

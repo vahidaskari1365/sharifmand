@@ -294,7 +294,10 @@ function AIAssistantContent() {
   };
 
   useEffect(() => {
-    if (input && tab === "guide") ask(input);
+    const initial = input;
+    if (!initial || tab !== "guide") return;
+    // شروع خودکار پرسش از پارامتر ?q= — بدون setState همگام داخل بدنه effect
+    queueMicrotask(() => { void ask(initial); });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

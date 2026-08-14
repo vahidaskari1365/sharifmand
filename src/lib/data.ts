@@ -88,19 +88,13 @@ export const CONSULTATION_TYPES: {
   { key: "video", title: "مشاوره تصویری", desc: "جلسه ویدئویی داخل پلتفرم", icon: "video" },
 ];
 
-/* ---------------- Stats ---------------- */
-export const STATS: { value: string; label: string; icon: IconKey }[] = [
-  { value: "+۱٬۲۰۰", label: "وکیل تأییدشده", icon: "badge" },
-  { value: "+۸۵٬۰۰۰", label: "پرونده موفق", icon: "folder" },
-  { value: "۴٫۸/۵", label: "میانگین رضایت", icon: "star" },
-  { value: "۲۴/۷", label: "پشتیبانی آنلاین", icon: "clock" },
-];
-
-/* ---------------- Trust badges ---------------- */
+/* ---------------- Trust badges ----------------
+   Only claims the platform can actually honour today. Nothing here may
+   promise something there is no backend for (no fake ratings / guarantees). */
 export const TRUST_BADGES: { title: string; desc: string; icon: IconKey }[] = [
   { title: "احراز هویت و تأیید پروانه", desc: "هویت و پروانه همه وکلا توسط کارشناسان شریفمند راستی‌آزمایی می‌شود.", icon: "badge" },
-  { title: "محرمانگی کامل اطلاعات", desc: "اطلاعات شما با رمزنگاری نگهداری و در اختیار غیر قرار نمی‌گیرد.", icon: "lock" },
-  { title: "تضمین بازگشت وجه", desc: "در صورت عدم ارائه خدمت، مبلغ پرداختی قابل بازگشت است.", icon: "shield" },
+  { title: "محرمانگی اطلاعات", desc: "اطلاعات شما محرمانه نگه‌داری می‌شود و طبق سیاست حریم خصوصی در اختیار غیر قرار نمی‌گیرد.", icon: "lock" },
+  { title: "بازگشت وجه طبق سیاست شفاف", desc: "اگر خدمتی ارائه نشود، وجه شما طبق سیاست بازگشت وجه عودت داده می‌شود.", icon: "shield" },
   { title: "حل اختلاف شفاف", desc: "تیم پشتیبانی در صورت بروز اختلاف، رسیدگی بی‌طرفانه انجام می‌دهد.", icon: "balance" },
 ];
 
@@ -117,15 +111,15 @@ export const NAV: {
     href: "/services",
     children: [
       { label: "مشاوره حقوقی", href: "/consultation", desc: "متنی، صوتی و تصویری" },
-      { label: "درخواست وکیل", href: "/cases/create", desc: "ثبت پرونده و معرفی وکیل" },
-      { label: "تنظیم قرارداد", href: "/contracts/builder", desc: "قراردادساز هوشمند" },
-      { label: "تنظیم دادخواست و شکواییه", href: "/legal-forms", desc: "فرم‌های حقوقی" },
-      { label: "بررسی قرارداد", href: "/contracts/review", desc: "تحلیل هوشمند + وکیل" },
+      { label: "ثبت پرونده و درخواست وکیل", href: "/case/new", desc: "معرفی وکیل توسط کارشناسان" },
+      { label: "تنظیم قرارداد", href: "/contracts/builder", desc: "قراردادساز گام‌به‌گام" },
+      { label: "تنظیم دادخواست و شکواییه", href: "/legal-forms", desc: "فرم‌های حقوقی آماده" },
+      { label: "بررسی قرارداد", href: "/contracts/review", desc: "تحلیل بندهای پرریسک" },
       { label: "خدمات ثبتی", href: "/pricing", desc: "ثبت شرکت و برند" },
     ],
   },
   {
-    label: "پیدا کردن وکیل",
+    label: "وکیل‌یابی",
     href: "/lawyers",
     children: [
       { label: "همه وکلا", href: "/lawyers", desc: "جستجو با فیلتر پیشرفته" },
@@ -133,6 +127,16 @@ export const NAV: {
       { label: "وکلای ملکی", href: "/lawyers?sp=ملک", desc: "تخلیه، سند، تصرف" },
       { label: "وکلای کیفری", href: "/lawyers?sp=کیفری", desc: "دفاع کیفری" },
       { label: "وکلا بر اساس شهر", href: "/lawyers#cities", desc: "وکلای شهر شما" },
+    ],
+  },
+  {
+    label: "ابزارها",
+    href: "/ai-assistant",
+    children: [
+      { label: "دستیار حقوقی", href: "/ai-assistant", desc: "راهنمای حقوقی هوشمند" },
+      { label: "تحلیل قرارداد", href: "/contracts/review", desc: "بندهای پرریسک" },
+      { label: "قراردادساز", href: "/contracts/builder", desc: "ساخت قرارداد گام‌به‌گام" },
+      { label: "فرم‌های حقوقی", href: "/legal-forms", desc: "دادخواست، شکواییه، اظهارنامه" },
     ],
   },
   {
@@ -146,18 +150,9 @@ export const NAV: {
       { label: "واژه‌نامه حقوقی", href: "/glossary", desc: "اصطلاحات حقوقی" },
     ],
   },
-  {
-    label: "ابزارهای حقوقی",
-    href: "/ai-assistant",
-    children: [
-      { label: "دستیار حقوقی AI", href: "/ai-assistant", desc: "راهنمای حقوقی هوشمند" },
-      { label: "تحلیل قرارداد", href: "/contracts/review", desc: "بندهای پرریسک" },
-      { label: "قراردادساز", href: "/contracts/builder", desc: "ساخت قرارداد گام‌به‌گام" },
-      { label: "فرم‌های حقوقی", href: "/legal-forms", desc: "دادخواست، شکواییه، اظهارنامه" },
-    ],
-  },
   { label: "برای کسب‌وکارها", href: "/business" },
-  { label: "دستیار هوش مصنوعی", href: "/ai-assistant", ai: true },
+  { label: "پیگیری پرونده", href: "/track-case" },
+  { label: "دستیار حقوقی", href: "/ai-assistant", ai: true },
 ];
 
 /* ---------------- Contract categories ---------------- */

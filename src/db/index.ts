@@ -48,7 +48,6 @@ function getDb() {
     if (!process.env.DATABASE_URL) {
       if (!noopWarned) {
         noopWarned = true;
-        // eslint-disable-next-line no-console
         console.warn(
           "[sharifmand] DATABASE_URL is not set — running in degraded mode (DB sections will be empty).",
         );

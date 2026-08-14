@@ -1,132 +1,248 @@
-"use client";
-
-import { use, useState } from "react";
+import type { Metadata } from "next";
+import { redirect } from "next/navigation";
+import { db } from "@/db";
+import { cases, documents, payments, consultations } from "@/db/schema";
+import { desc, eq, and } from "drizzle-orm";
 import { PageHero } from "@/components/page-hero";
-import { Container, Card, Badge, Button } from "@/components/ui";
+import { Container, Card, Badge, Button, EmptyState } from "@/components/ui";
 import { Icon } from "@/components/icons";
-import { faNum } from "@/lib/data";
+import { faNum, faPrice } from "@/lib/data";
+import { getCurrentUser } from "@/lib/user-auth";
+import { CASE_STATUS_FA, buildCaseTimeline, nextActionForCase } from "@/lib/case-facts";
 
-const TIMELINE = [
-  { title: "ثبت پرونده", date: "۱۰ اردیبهشت", done: true },
-  { title: "بررسی مدارک", date: "۱۲ اردیبهشت", done: true },
-  { title: "تنظیم دادخواست", date: "۱۵ اردیبهشت", done: true },
-  { title: "ثبت دادخواست", date: "۱۸ اردیبهشت", done: true, current: false },
-  { title: "تعیین شعبه", date: "در انتظار", done: false },
-  { title: "جلسه اول", date: "—", done: false },
-  { title: "صدور رأی", date: "—", done: false },
-];
+export const metadata: Metadata = {
+  title: "پرونده من — شریفمند",
+  description: "جزئیات واقعی پرونده، مراحل، مدارک و پرداخت‌های شما.",
+};
 
-const DOCS = [
-  { name: "قرارداد اجاره ۱۴۰۳.pdf", type: "قرارداد", size: "۲۴۰ کیلوبایت" },
-  { name: "کارت ملی.jpg", type: "هویتی", size: "۱۲۰ کیلوبایت" },
-  { name: "اظهارنامه مطالبه وجه.pdf", type: "اظهارنامه", size: "۸۰ کیلوبایت" },
-];
+export const dynamic = "force-dynamic";
 
-export default function CaseDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = use(params);
-  const [tab, setTab] = useState("timeline");
-  const caseId = id || "1258-0001";
+const faDate = (d: Date | null | undefined) =>
+  d ? new Intl.DateTimeFormat("fa-IR", { dateStyle: "medium" }).format(d as Date) : "—";
 
-  const TABS = [
-    { key: "summary", label: "خلاصه", icon: "home" as const },
-    { key: "timeline", label: "Timeline", icon: "clock" as const },
-    { key: "docs", label: "مدارک", icon: "document" as const },
-    { key: "deadlines", label: "مهلت‌ها", icon: "alert" as const },
-    { key: "messages", label: "پیام‌ها", icon: "chat" as const },
-    { key: "payments", label: "پرداخت‌ها", icon: "money" as const },
-  ];
+const PAYMENT_STATUS_FA: Record<string, string> = {
+  initiated: "ایجاد شده",
+  pending: "در انتظار تأیید",
+  verified: "تأیید‌شده",
+  failed: "ناکام",
+  refunded: "عودت‌داده‌شده",
+  manual_review: "در حال بررسی کارشناس",
+};
+
+/**
+ * Real case detail for the signed-in client. Everything on this page comes
+ * from this user's own rows — ownership is enforced by contactPhone match.
+ */
+export default async function CaseDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const user = await getCurrentUser();
+  if (!user) redirect("/login");
+
+  let row: typeof cases.$inferSelect | null = null;
+  let userDocs: typeof documents.$inferSelect[] = [];
+  let userPayments: { payment: typeof payments.$inferSelect; consult: typeof consultations.$inferSelect | null }[] = [];
+  try {
+    const rows = await db
+      .select()
+      .from(cases)
+      .where(and(eq(cases.caseNumber, id), eq(cases.contactPhone, user.phone)))
+      .limit(1);
+    row = rows[0] ?? null;
+    if (row) {
+      [userDocs] = await Promise.all([
+        db.select().from(documents).where(eq(documents.userPhone, user.phone)).orderBy(desc(documents.createdAt)).limit(10),
+      ]);
+      const consultRows = await db
+        .select()
+        .from(consultations)
+        .where(eq(consultations.clientPhone, user.phone))
+        .orderBy(desc(consultations.createdAt))
+        .limit(20);
+      const refs = consultRows.map((c) => c.paymentRef).filter((r): r is string => !!r);
+      const pays: typeof payments.$inferSelect[] = [];
+      // Fetch each payment by its unique reference (indexed) — simple and safe.
+      for (const r of refs) {
+        const pr = await db.select().from(payments).where(eq(payments.reference, r)).limit(1);
+        if (pr[0]) pays.push(pr[0]);
+      }
+      userPayments = pays.map((payment) => ({
+        payment,
+        consult: consultRows.find((c) => c.paymentRef === payment.reference) ?? null,
+      }));
+    }
+  } catch {
+    row = null;
+  }
+
+  if (!row) {
+    return (
+      <Container className="py-16">
+        <EmptyState
+          icon="folder"
+          title="پرونده‌ای با این مشخصات پیدا نشد"
+          desc="یا شماره پرونده اشتباه است یا با این حساب دسترسی ندارید. می‌توانید با کد رهگیری، پرونده را پیگیری کنید."
+        />
+        <div className="mt-5 flex flex-wrap justify-center gap-3">
+          <Button href="/dashboard/cases" icon="folder">پرونده‌های من</Button>
+          <Button href="/track-case" variant="outline" icon="search">پیگیری با کد رهگیری</Button>
+        </div>
+      </Container>
+    );
+  }
+
+  const timeline = buildCaseTimeline(row.stage);
+  const next = nextActionForCase(row.stage, row.status);
 
   return (
     <>
-      <PageHero title="پرونده: مطالبه وجه چک" desc={`شماره پرونده ${caseId} • در حال رسیدگی`} breadcrumb={[{ label: "خانه", href: "/" }, { label: "پنل موکل", href: "/dashboard/client" }, { label: "پرونده" }]}>
+      <PageHero
+        title={`پرونده: ${row.subject}`}
+        desc={`شماره ${row.caseNumber} • ${row.city} • ثبت‌شده در ${faDate(row.createdAt)}`}
+        breadcrumb={[
+          { label: "خانه", href: "/" },
+          { label: "پنل موکل", href: "/dashboard/client" },
+          { label: "پرونده‌ها", href: "/dashboard/cases" },
+          { label: row.caseNumber },
+        ]}
+        badge={`وضعیت: ${CASE_STATUS_FA[row.status] ?? row.status}`}
+      >
         <div className="flex flex-wrap items-center gap-2">
-          <Badge tone="success">در حال رسیدگی</Badge>
-          <Badge tone="primary" icon="user">وکیل: دکتر سهراب محمدی</Badge>
-          <Button href="/consultation" variant="outline" size="sm" icon="chat">پیام به وکیل</Button>
+          {next.href && (
+            <Button href={next.href} icon="arrow" size="sm">اقدام بعدی</Button>
+          )}
+          {row.budget && <Badge tone="neutral" icon="money">بودجه: {row.budget}</Badge>}
         </div>
       </PageHero>
 
-      <Container className="py-10">
-        {/* Tabs */}
-        <div className="mb-6 flex gap-1 overflow-x-auto rounded-2xl border border-border bg-surface p-1.5">
-          {TABS.map((t) => (
-            <button key={t.key} type="button" onClick={() => setTab(t.key)} className={`inline-flex shrink-0 items-center gap-1.5 rounded-xl px-3.5 py-2 text-sm font-medium transition-all ${tab === t.key ? "bg-primary text-primary-foreground" : "text-foreground-soft hover:bg-surface-2"}`}>
-              <Icon name={t.icon} className="h-4 w-4" /> {t.label}
-            </button>
-          ))}
-        </div>
+      <Container className="space-y-6 py-10">
+        {/* اقدام بعدی — command center for this case */}
+        <Card hover={false} className="border-primary/30 bg-primary-soft/40">
+          <h2 className="flex items-center gap-2 font-bold text-foreground">
+            <Icon name="bolt" className="h-5 w-5 text-accent" />
+            {next.action}
+          </h2>
+          <p className="mt-1.5 text-sm leading-7 text-foreground-soft">{next.detail}</p>
+          {next.href && (
+            <Button href={next.href} size="sm" icon="arrow" className="mt-4">همین حالا انجام بده</Button>
+          )}
+        </Card>
 
-        {tab === "summary" && (
-          <Card hover={false} className="grid gap-4 sm:grid-cols-2">
-            {[
-              { k: "موضوع", v: "مطالبه وجه چک برگشتی" },
-              { k: "شهر", v: "تهران" },
-              { k: "مرحله", v: "ثبت دادخواست" },
-              { k: "وکیل", v: "دکتر سهراب محمدی" },
-              { k: "تاریخ تشکیل", v: "۱۰ اردیبهشت ۱۴۰۳" },
-              { k: "مهلت نزدیک", v: "جلسه ۲۵ اردیبهشت" },
-            ].map((x) => (
-              <div key={x.k} className="rounded-xl border border-border bg-surface-2 p-3"><p className="text-xs text-muted">{x.k}</p><p className="mt-0.5 text-sm font-bold text-foreground">{x.v}</p></div>
+        {/* جزئیات ثبتی واقعی */}
+        <Card hover={false} className="grid gap-4 sm:grid-cols-2">
+          <div>
+            <p className="text-xs text-muted">موضوع</p>
+            <p className="mt-1 font-bold text-foreground">{row.subject}</p>
+          </div>
+          <div>
+            <p className="text-xs text-muted">شهر</p>
+            <p className="mt-1 font-bold text-foreground">{row.city}</p>
+          </div>
+          <div>
+            <p className="text-xs text-muted">مرحله فعلی</p>
+            <p className="mt-1 font-bold text-foreground">{row.stage}</p>
+          </div>
+          <div>
+            <p className="text-xs text-muted">کد رهگیری (برای پیگیری سریع)</p>
+            <p className="mt-1 font-mono text-sm font-bold text-primary" dir="ltr">{row.trackingToken}</p>
+          </div>
+          <div className="sm:col-span-2">
+            <p className="text-xs text-muted">شرح پرونده (همان‌طور که ثبت کرده‌اید)</p>
+            <p className="mt-1 text-sm leading-7 text-foreground-soft">{row.description}</p>
+          </div>
+        </Card>
+
+        {/* مراحل */}
+        <Card hover={false}>
+          <h2 className="font-bold text-foreground">مراحل پرونده</h2>
+          <div className="mt-5 space-y-0">
+            {timeline.map((t, i) => (
+              <div key={t.title} className="flex gap-3">
+                <div className="flex flex-col items-center">
+                  <span
+                    className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full border-2 text-[11px] font-bold ${
+                      t.state === "done"
+                        ? "border-success bg-success text-primary-foreground"
+                        : t.state === "current"
+                          ? "border-primary bg-primary text-primary-foreground"
+                          : "border-border bg-surface text-muted"
+                    }`}
+                  >
+                    {t.state === "done" ? <Icon name="check" className="h-3.5 w-3.5" /> : faNum(i + 1)}
+                  </span>
+                  {i < timeline.length - 1 && (
+                    <span className={`h-8 w-0.5 ${t.state === "done" ? "bg-success" : "bg-border"}`} />
+                  )}
+                </div>
+                <div className="-mt-0.5 pb-6">
+                  <p className={`text-sm font-bold ${t.state === "current" ? "text-primary" : "text-foreground"}`}>
+                    {t.title}
+                    {t.state === "current" && (
+                      <span className="mr-2 rounded-full bg-primary-soft px-2 py-0.5 text-[10px] font-bold text-primary">مرحله فعلی</span>
+                    )}
+                  </p>
+                </div>
+              </div>
             ))}
-          </Card>
-        )}
+          </div>
+        </Card>
 
-        {tab === "timeline" && (
-          <Card hover={false}>
-            <ol className="space-y-0">
-              {TIMELINE.map((t, i) => (
-                <li key={t.title} className="flex gap-4">
-                  <div className="flex flex-col items-center">
-                    <span className={`flex h-8 w-8 items-center justify-center rounded-full text-xs ${t.done ? "bg-primary text-primary-foreground" : "bg-surface-2 text-muted"}`}>{t.done ? <Icon name="check" className="h-4 w-4" /> : faNum(i + 1)}</span>
-                    {i < TIMELINE.length - 1 && <span className={`my-1 w-0.5 flex-1 ${t.done ? "bg-primary" : "bg-border"}`} style={{ minHeight: 28 }} />}
-                  </div>
-                  <div className="pb-5"><p className={`text-sm font-semibold ${t.done ? "text-foreground" : "text-muted"}`}>{t.title}</p><p className="text-xs text-muted">{t.date}</p></div>
+        {/* مدارک — real uploads of this user */}
+        <Card hover={false}>
+          <h2 className="flex items-center gap-2 font-bold text-foreground">
+            <Icon name="document" className="h-5 w-5 text-primary" />
+            مدارک شما
+          </h2>
+          {userDocs.length ? (
+            <ul className="mt-4 divide-y divide-border">
+              {userDocs.map((d) => (
+                <li key={d.id} className="flex items-center justify-between py-3 text-sm">
+                  <span className="flex items-center gap-2 font-medium text-foreground">
+                    <Icon name="file" className="h-4 w-4 text-muted" />
+                    {d.name}
+                  </span>
+                  <span className="text-xs text-muted">{d.type} • {faNum(Math.round(d.size / 1024))} کیلوبایت</span>
                 </li>
               ))}
-            </ol>
-          </Card>
-        )}
+            </ul>
+          ) : (
+            <p className="mt-3 rounded-xl bg-surface-2 p-4 text-sm leading-7 text-muted">
+              هنوز مدرکی بارگذاری نکرده‌اید. مدارک از پنل موکل اضافه می‌شوند تا بررسی پرونده سریع‌تر انجام شود.
+            </p>
+          )}
+        </Card>
 
-        {tab === "docs" && (
-          <div className="space-y-3">
-            <div className="flex justify-end"><Button size="sm" icon="plus">آپلود سند</Button></div>
-            {DOCS.map((d) => (
-              <Card key={d.name} hover={false} className="flex items-center gap-3">
-                <span className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-surface-2 text-foreground-soft"><Icon name="file" className="h-5 w-5" /></span>
-                <div className="flex-1"><p className="text-sm font-bold text-foreground">{d.name}</p><p className="text-xs text-muted">{d.type} • {d.size}</p></div>
-                <Icon name="lock" className="h-4 w-4 text-success" />
-              </Card>
-            ))}
-          </div>
-        )}
+        {/* پرداخت‌ها — real payment facts only */}
+        <Card hover={false}>
+          <h2 className="flex items-center gap-2 font-bold text-foreground">
+            <Icon name="money" className="h-5 w-5 text-primary" />
+            پرداخت‌ها
+          </h2>
+          {userPayments.length ? (
+            <ul className="mt-4 divide-y divide-border">
+              {userPayments.map(({ payment, consult }) => (
+                <li key={payment.id} className="flex flex-wrap items-center justify-between gap-2 py-3 text-sm">
+                  <div>
+                    <p className="font-medium text-foreground">{consult ? consult.subject : `پرداخت ${payment.orderType}`}</p>
+                    <p className="mt-0.5 font-mono text-[11px] text-muted" dir="ltr">{payment.reference}</p>
+                  </div>
+                  <div className="text-left">
+                    <p className="font-bold text-foreground">{faPrice(payment.amount)}</p>
+                    <p className="mt-0.5 text-[11px] text-muted">{PAYMENT_STATUS_FA[payment.status] ?? payment.status}</p>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="mt-3 rounded-xl bg-surface-2 p-4 text-sm leading-7 text-muted">
+              هنوز پرداختی برای شما ثبت نشده است. بعد از تأیید هر خدمت، صورتحساب واقعی همین‌جا نمایش داده می‌شود.
+            </p>
+          )}
+        </Card>
 
-        {tab === "deadlines" && (
-          <div className="space-y-3">
-            {[{ t: "جلسه دادگاه", d: "شنبه ۲۵ اردیبهشت — ۱۰:۰۰", u: true }, { t: "مهلت پاسخ به اخطار", d: "۲۸ اردیبهشت", u: true }, { t: "ارسال مدارک مکمل", d: "۳۰ اردیبهشت", u: false }].map((e) => (
-              <Card key={e.t} hover={false} className={`flex items-center gap-3 ${e.u ? "border-danger/30 bg-danger/5" : ""}`}>
-                <span className={`inline-flex h-10 w-10 items-center justify-center rounded-lg ${e.u ? "bg-danger/15 text-danger" : "bg-primary-soft text-primary"}`}><Icon name="clock" className="h-5 w-5" /></span>
-                <div className="flex-1"><p className="text-sm font-bold text-foreground">{e.t}</p><p className="text-xs text-muted">{e.d}</p></div>
-                {e.u && <Badge tone="danger">فوری</Badge>}
-              </Card>
-            ))}
-          </div>
-        )}
-
-        {tab === "messages" && (
-          <Card hover={false} className="space-y-3">
-            {[{ from: "دکتر سهراب محمدی", text: "دادخواست ثبت شد، منتظر تعیین شعبه هستیم.", me: false }, { from: "شما", text: "ممنون، مدارک جدید را آپلود کردم.", me: true }].map((m, i) => (
-              <div key={i} className={`flex ${m.me ? "justify-start" : "justify-end"}`}><div className={`max-w-[75%] rounded-2xl px-4 py-2.5 text-sm ${m.me ? "bg-primary-soft text-foreground" : "bg-primary text-primary-foreground"}`}><p className="text-[11px] opacity-80">{m.from}</p>{m.text}</div></div>
-            ))}
-          </Card>
-        )}
-
-        {tab === "payments" && (
-          <Card hover={false} className="space-y-3">
-            {[{ t: "حق‌الوکاله — مرحله اول", a: "۳٫۵۰۰٫۰۰۰ تومان", s: "پرداخت‌شده" }, { t: "هزینه دادرسی", a: "۸۵۰٫۰۰۰ تومان", s: "پرداخت‌شده" }, { t: "حق‌الوکاله — مرحله دوم", a: "۲٫۰۰۰٫۰۰۰ تومان", s: "در انتظار" }].map((p) => (
-              <div key={p.t} className="flex items-center justify-between rounded-xl border border-border p-3"><div><p className="text-sm font-bold text-foreground">{p.t}</p><p className="text-xs text-muted">{p.a}</p></div><Badge tone={p.s === "پرداخت‌شده" ? "success" : "accent"}>{p.s}</Badge></div>
-            ))}
-          </Card>
-        )}
+        <div className="flex flex-wrap gap-3">
+          <Button href="/support" variant="outline" icon="mail">سؤال از پشتیبانی</Button>
+          <Button href="/consultation" variant="outline" icon="chat">درخواست مشاوره</Button>
+        </div>
       </Container>
     </>
   );

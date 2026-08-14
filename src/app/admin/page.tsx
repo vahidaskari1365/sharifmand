@@ -58,7 +58,7 @@ export default async function AdminPage() {
     { label: "مقالات", value: s.articles, icon: "book" as const, tone: "accent" as const, href: "/knowledge" },
     { label: "قراردادها", value: s.contracts, icon: "file" as const, tone: "success" as const, href: "/contracts" },
     { label: "پرسش و پاسخ", value: s.qa, icon: "chat" as const, tone: "neutral" as const, href: "/qa" },
-    { label: "پرونده‌ها", value: s.cases, icon: "folder" as const, tone: "primary" as const, href: "/cases/create" },
+    { label: "پرونده‌ها", value: s.cases, icon: "folder" as const, tone: "primary" as const, href: "/case/new" },
     { label: "مشاوره‌ها", value: s.consultations, icon: "calendar" as const, tone: "accent" as const, href: "/consultation" },
     { label: "تیکت‌ها", value: s.tickets, icon: "chat" as const, tone: "neutral" as const, href: "/support" },
     { label: "بازدید صفحات", value: s.views, icon: "sparkles" as const, tone: "success" as const, href: "#tracking" },
@@ -111,7 +111,7 @@ export default async function AdminPage() {
                   </div>
                   <div className="flex shrink-0 items-center gap-2">
                     <Badge tone="neutral">{faNum(a.views)} بازدید</Badge>
-                    <a href={`/admin/articles/${a.id}/edit`} className="text-sm font-semibold text-primary hover:underline">ویرایش</a>
+                    <Link href={`/admin/articles/${a.id}/edit`} className="text-sm font-semibold text-primary hover:underline">ویرایش</Link>
                   </div>
                 </Card>
               ))}

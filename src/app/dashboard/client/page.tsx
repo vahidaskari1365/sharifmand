@@ -4,11 +4,13 @@ import { db } from "@/db";
 import { cases, consultations, tickets } from "@/db/schema";
 import { desc, eq } from "drizzle-orm";
 import { DashboardShell } from "@/components/dashboard-shell";
-import { Card, Badge } from "@/components/ui";
+import { Card, Badge, Button } from "@/components/ui";
 import { Icon } from "@/components/icons";
 import { faNum } from "@/lib/data";
 import { getCurrentUser } from "@/lib/user-auth";
+import { nextActionForCase } from "@/lib/case-facts";
 import DocumentsManager from "@/components/documents-manager";
+import Link from "next/link";
 export const metadata: Metadata = {
   title: "پنل موکل — داشبورد حقوقی من",
   description: "مدیریت پرونده‌ها، مشاوره‌ها، اسناد، قراردادها، پرداخت‌ها و پیام‌های شما.",
@@ -39,6 +41,14 @@ export default async function ClientDashboard() {
     { label: "خوش آمدید", value: user.name.split(" ")[0], icon: "user" as const, tone: "neutral" as const },
   ];
 
+  // Next Action — command centre: derived from the newest real case/consultation
+  const latestCase = myCases[0] ?? null;
+  const nextAction = latestCase
+    ? nextActionForCase(latestCase.stage, latestCase.status)
+    : myConsults.length > 0
+      ? { action: "در انتظار تأیید مشاوره", detail: "کارشناسان برای تأیید نوبت مشاوره شما تماس می‌گیرند. از کد پیگیری در «پیگیری» وضعیت را ببینید.", href: "/track-case" }
+      : { action: "اقدام بعدی شما: شروع اولین درخواست", detail: "هنوز پرونده یا مشاوره‌ای ثبت نکرده‌اید؛ از مسیر سریع شروع کنید تا بهترین اقدام مشخص شود.", href: "/#quickstart" };
+
   const recentItems = [
     ...myCases.map((c) => ({ kind: "پرونده", title: c.subject, meta: c.caseNumber + " • " + c.city, tone: "primary" as const })),
     ...myConsults.map((c) => ({ kind: "مشاوره", title: c.subject, meta: c.type + " • " + c.status, tone: "accent" as const })),
@@ -50,18 +60,32 @@ export default async function ClientDashboard() {
       role="موکل"
       title={`داشبورد حقوقی ${user.name}`}
       nav={[
-        { label: "نمای کلی", icon: "home", active: true },
-        { label: "پرونده‌های من", icon: "folder", badge: faNum(myCases.length) },
-        { label: "وکلای من", icon: "user" },
-        { label: "مشاوره‌ها", icon: "chat", badge: faNum(myConsults.length) },
-        { label: "اسناد و مدارک", icon: "document" },
-        { label: "قراردادها", icon: "file" },
-        { label: "پرداخت‌ها", icon: "money" },
-        { label: "پیام‌ها", icon: "mail", badge: faNum(myTickets.length) },
-        { label: "اعلان‌ها", icon: "alert" },
-        { label: "تنظیمات", icon: "user" },
+        { label: "نمای کلی", icon: "home", active: true, href: "/dashboard/client" },
+        { label: "پرونده‌های من", icon: "folder", badge: faNum(myCases.length), href: "/dashboard/cases" },
+        { label: "مشاوره‌های من", icon: "chat", badge: faNum(myConsults.length), href: "/dashboard/client" },
+        { label: "پیگیری پرونده", icon: "search", href: "/track-case" },
+        { label: "اسناد و مدارک", icon: "document", href: "/dashboard/client" },
+        { label: "رزرو مشاوره", icon: "calendar", href: "/consultation" },
+        { label: "ثبت پرونده جدید", icon: "folder", href: "/case/new" },
+        { label: "پیام‌ها و پشتیبانی", icon: "mail", badge: faNum(myTickets.length), href: "/support" },
       ]}
     >
+      {/* اقدام بعدی — Command Center */}
+      <Card hover={false} className="border-primary/30 bg-primary-soft/40">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div className="min-w-0 flex-1">
+            <p className="text-xs font-bold uppercase tracking-wide text-accent">اقدام بعدی شما</p>
+            <h2 className="mt-1 font-bold text-foreground">{nextAction.action}</h2>
+            <p className="mt-1 text-sm leading-7 text-foreground-soft">{nextAction.detail}</p>
+          </div>
+          {("href" in nextAction) && nextAction.href && (
+            <Button href={nextAction.href} size="sm" icon="arrow" className="shrink-0">
+              انجام بده
+            </Button>
+          )}
+        </div>
+      </Card>
+
       {/* Stats */}
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         {stats.map((s) => (
@@ -85,11 +109,11 @@ export default async function ClientDashboard() {
         <Card hover={false}>
           <div className="flex items-center justify-between">
             <h2 className="flex items-center gap-2 font-bold text-foreground"><Icon name="folder" className="h-5 w-5 text-primary" /> پرونده‌های من</h2>
-            <a href="/case/new" className="text-xs font-medium text-primary hover:text-primary-hover">+ پرونده جدید</a>
+            <Link href="/case/new" className="text-xs font-medium text-primary hover:text-primary-hover">+ پرونده جدید</Link>
           </div>
           <div className="mt-4 space-y-3">
             {myCases.length > 0 ? myCases.map((c) => (
-              <div key={c.id} className="rounded-xl border border-border p-3">
+              <Link key={c.id} href={`/dashboard/cases/${c.caseNumber}`} className="block rounded-xl border border-border p-3 transition-colors hover:border-primary/30 hover:bg-surface-2/60">
                 <div className="flex items-center justify-between">
                   <p className="text-sm font-bold text-foreground">{c.subject}</p>
                   <span className="font-mono text-xs text-muted" dir="ltr">{c.caseNumber}</span>
@@ -99,11 +123,11 @@ export default async function ClientDashboard() {
                   <Badge tone="success">{c.status}</Badge>
                   <span className="mr-auto text-xs text-muted">{c.city}</span>
                 </div>
-              </div>
+              </Link>
             )) : (
               <div className="rounded-xl border border-dashed border-border p-6 text-center text-sm text-muted">
                 هنوز پرونده‌ای ثبت نکرده‌اید.
-                <a href="/case/new" className="mr-2 text-primary hover:text-primary-hover">ثبت اولین پرونده</a>
+                <Link href="/case/new" className="mr-2 text-primary hover:text-primary-hover">ثبت اولین پرونده</Link>
               </div>
             )}
           </div>
@@ -134,7 +158,7 @@ export default async function ClientDashboard() {
         <Card hover={false}>
           <div className="flex items-center justify-between">
             <h2 className="flex items-center gap-2 font-bold text-foreground"><Icon name="mail" className="h-5 w-5 text-success" /> تیکت‌های پشتیبانی</h2>
-            <a href="/contact" className="inline-flex items-center gap-1 rounded-lg bg-primary-soft px-2.5 py-1 text-xs font-medium text-primary"><Icon name="plus" className="h-3.5 w-3.5" /> تیکت جدید</a>
+            <Link href="/contact" className="inline-flex items-center gap-1 rounded-lg bg-primary-soft px-2.5 py-1 text-xs font-medium text-primary"><Icon name="plus" className="h-3.5 w-3.5" /> تیکت جدید</Link>
           </div>
           <div className="mt-4 space-y-2">
             {myTickets.length > 0 ? myTickets.map((t) => (
@@ -147,14 +171,14 @@ export default async function ClientDashboard() {
                 <Badge tone={t.status === "open" ? "primary" : "success"}>{t.status === "open" ? "باز" : "بسته"}</Badge>
               </div>
             )) : (
-              <p className="rounded-xl border border-dashed border-border p-6 text-center text-sm text-muted">تیکتی ثبت نکرده‌اید. برای ارتباط با پشتیبانی <a href="/contact" className="text-primary hover:underline">اینجا</a> کلیک کنید.</p>
+              <p className="rounded-xl border border-dashed border-border p-6 text-center text-sm text-muted">تیکتی ثبت نکرده‌اید. برای ارتباط با پشتیبانی <Link href="/contact" className="text-primary hover:underline">اینجا</Link> کلیک کنید.</p>
             )}
           </div>
         </Card>
         <Card hover={false}>
           <div className="flex items-center justify-between">
             <h2 className="flex items-center gap-2 font-bold text-foreground"><Icon name="chat" className="h-5 w-5 text-accent" /> مشاوره‌های من</h2>
-            <a href="/consultation" className="inline-flex items-center gap-1 rounded-lg bg-accent-soft px-2.5 py-1 text-xs font-medium text-accent"><Icon name="calendar" className="h-3.5 w-3.5" /> رزرو مشاوره</a>
+            <Link href="/consultation" className="inline-flex items-center gap-1 rounded-lg bg-accent-soft px-2.5 py-1 text-xs font-medium text-accent"><Icon name="calendar" className="h-3.5 w-3.5" /> رزرو مشاوره</Link>
           </div>
           <div className="mt-4 space-y-2">
             {myConsults.length > 0 ? myConsults.map((c) => (
@@ -167,7 +191,7 @@ export default async function ClientDashboard() {
                 <Badge tone="accent">{c.status}</Badge>
               </div>
             )) : (
-              <p className="rounded-xl border border-dashed border-border p-6 text-center text-sm text-muted">مشاوره‌ای ثبت نکرده‌اید. <a href="/consultation" className="text-accent hover:underline">رزرو مشاوره آنلاین</a></p>
+              <p className="rounded-xl border border-dashed border-border p-6 text-center text-sm text-muted">مشاوره‌ای ثبت نکرده‌اید. <Link href="/consultation" className="text-accent hover:underline">رزرو مشاوره آنلاین</Link></p>
             )}
           </div>
         </Card>

@@ -5,6 +5,15 @@ import { useState } from "react";
 import { Icon } from "./icons";
 import { SPECIALTIES, ALL_CITIES } from "@/lib/data";
 
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <label className="flex flex-col gap-1.5">
+      <span className="text-xs font-semibold text-muted">{label}</span>
+      {children}
+    </label>
+  );
+}
+
 export interface LawyerFiltersProps {
   initial: {
     q?: string;
@@ -32,19 +41,6 @@ export function LawyerFilters({ initial, total }: LawyerFiltersProps) {
     setQ("");
     router.push("/lawyers");
   };
-
-  const Field = ({
-    label,
-    children,
-  }: {
-    label: string;
-    children: React.ReactNode;
-  }) => (
-    <label className="flex flex-col gap-1.5">
-      <span className="text-xs font-semibold text-muted">{label}</span>
-      {children}
-    </label>
-  );
 
   const selectCls =
     "h-10 w-full rounded-xl border border-border-strong bg-background px-3 text-sm text-foreground outline-none transition-colors focus:border-primary";

@@ -26,7 +26,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const staticRoutes: MetadataRoute.Sitemap = [
     "", "services", "services/family", "services/property", "services/criminal", "services/commercial", "services/administrative",
-    "lawyers", "consultation", "booking", "cases/create", "contracts", "contracts/builder", "contracts/review",
+    "lawyers", "consultation", "case/new", "contracts", "contracts/builder", "contracts/review",
     "legal-forms", "ai-assistant", "knowledge", "qa", "laws", "judgments", "glossary",
     "pricing", "business", "about", "contact", "support", "notifications", "login", "register",
     "dashboard/client", "dashboard/lawyer", "dashboard/documents",

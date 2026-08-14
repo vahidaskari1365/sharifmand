@@ -12,56 +12,59 @@ import { Counter } from "@/components/counter";
 import { SERVICES, CONSULTATION_TYPES, faNum, faPrice } from "@/lib/data";
 import type { IconKey } from "@/lib/data";
 import { SPECIAL_SERVICES } from "@/lib/content";
+import { getPlatformStats } from "@/lib/stats";
 
 export const dynamic = "force-dynamic";
 
-const STATS_NUM: { to: number; decimals?: number; suffix?: string; label: string; icon: IconKey }[] = [
-  { to: 1200, suffix: "+", label: "وکیل تأییدشده", icon: "badge" },
-  { to: 85000, suffix: "+", label: "پرونده موفق", icon: "folder" },
-  { to: 4.8, decimals: 1, suffix: "/۵", label: "میانگین رضایت", icon: "star" },
-  { to: 24, suffix: "/۷", label: "پشتیبانی آنلاین", icon: "clock" },
-];
-
 const TRUST: { title: string; desc: string; icon: IconKey }[] = [
   { title: "احراز هویت و تأیید پروانه", desc: "هویت و پروانه همه وکلا توسط کارشناسان شریفمند راستی‌آزمایی می‌شود.", icon: "badge" },
-  { title: "محرمانگی کامل اطلاعات", desc: "اطلاعات شما با رمزنگاری نگهداری و در اختیار غیر قرار نمی‌گیرد.", icon: "lock" },
-  { title: "تضمین بازگشت وجه", desc: "در صورت عدم ارائه خدمت، مبلغ پرداختی قابل بازگشت است.", icon: "shield" },
+  { title: "محرمانگی اطلاعات", desc: "اطلاعات شما محرمانه نگه‌داری می‌شود و طبق سیاست حریم خصوصی در اختیار غیر قرار نمی‌گیرد.", icon: "lock" },
+  { title: "بازگشت وجه طبق سیاست شفاف", desc: "اگر خدمتی ارائه نشود، وجه شما طبق سیاست بازگشت وجه عودت داده می‌شود.", icon: "shield" },
   { title: "حل اختلاف شفاف", desc: "تیم پشتیبانی در صورت بروز اختلاف، رسیدگی بی‌طرفانه انجام می‌دهد.", icon: "balance" },
 ];
 
 export default async function HomePage() {
-  const [featured, recentArticles, popularQa, popularContracts] = await Promise.all([
+  const [featured, recentArticles, popularQa, popularContracts, stats] = await Promise.all([
     db.select().from(lawyers).where(eq(lawyers.featured, true)).limit(4),
     db.select().from(articles).orderBy(desc(articles.publishedAt)).limit(3),
     db.select().from(qaQuestions).orderBy(desc(qaQuestions.helpful)).limit(3),
     db.select().from(contracts).where(eq(contracts.popular, true)).limit(3),
+    getPlatformStats(),
   ]);
+
+  // Real numbers only — nothing fabricated; a metric is hidden when unknown.
+  const realStats: { to: number; label: string; icon: IconKey }[] = [
+    ...(stats.verifiedLawyers != null ? [{ to: stats.verifiedLawyers, label: "وکیل تأییدشده", icon: "badge" as IconKey }] : []),
+    ...(stats.registeredCases != null && stats.registeredCases > 0 ? [{ to: stats.registeredCases, label: "پرونده ثبت‌شده", icon: "folder" as IconKey }] : []),
+    ...(stats.answeredQuestions != null && stats.answeredQuestions > 0 ? [{ to: stats.answeredQuestions, label: "پرسش حقوقی پاسخ‌داده‌شده", icon: "chat" as IconKey }] : []),
+    ...(stats.publishedArticles != null && stats.publishedArticles > 0 ? [{ to: stats.publishedArticles, label: "مقاله حقوقی منتشرشده", icon: "book" as IconKey }] : []),
+  ];
 
   return (
     <div className="page-wash">
       <HomeHero />
 
-      {/* Stats */}
-      <Container>
-        <Reveal>
-          <div className="grid grid-cols-2 gap-4 rounded-3xl border border-border bg-surface/80 p-6 card-shadow backdrop-blur sm:grid-cols-4 sm:p-8">
-            {STATS_NUM.map((s) => (
-              <div key={s.label} className="flex flex-col items-center gap-1.5 text-center">
-                <span className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-primary-soft text-primary">
-                  <Icon name={s.icon} className="h-5 w-5" />
-                </span>
-                <Counter
-                  to={s.to}
-                  decimals={s.decimals ?? 0}
-                  suffix={s.suffix ?? ""}
-                  className="text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl"
-                />
-                <span className="text-xs text-muted sm:text-sm">{s.label}</span>
-              </div>
-            ))}
-          </div>
-        </Reveal>
-      </Container>
+      {/* Stats — real, DB-derived counters only */}
+      {realStats.length > 0 && (
+        <Container>
+          <Reveal>
+            <div className="grid grid-cols-2 gap-4 rounded-3xl border border-border bg-surface/80 p-6 card-shadow backdrop-blur sm:grid-cols-4 sm:p-8">
+              {realStats.map((s) => (
+                <div key={s.label} className="flex flex-col items-center gap-1.5 text-center">
+                  <span className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-primary-soft text-primary">
+                    <Icon name={s.icon} className="h-5 w-5" />
+                  </span>
+                  <Counter
+                    to={s.to}
+                    className="text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl"
+                  />
+                  <span className="text-xs text-muted sm:text-sm">{s.label}</span>
+                </div>
+              ))}
+            </div>
+          </Reveal>
+        </Container>
+      )}
 
       {/* Services grid */}
       <section className="mt-24">
@@ -128,8 +131,8 @@ export default async function HomePage() {
         </Container>
       </section>
 
-      {/* Quick start */}
-      <section className="mt-24">
+      {/* Quick start — decision engine */}
+      <section id="quickstart" className="mt-24 scroll-mt-24">
         <Container>
           <Reveal>
             <QuickStart />

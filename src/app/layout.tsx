@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
-import { Vazirmatn } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { noFlashScript } from "@/components/no-flash";
@@ -8,8 +8,12 @@ import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { Tracker } from "@/components/tracker";
 
-const vazirmatn = Vazirmatn({
-  subsets: ["arabic", "latin"],
+/* فونت وزیرمتن به‌صورت local میزبانی می‌شود تا build به شبکه خارجی وابسته نباشد */
+const vazirmatn = localFont({
+  src: [
+    { path: "../assets/fonts/vazirmatn-arabic-wght-normal.woff2", weight: "100 900", style: "normal" },
+    { path: "../assets/fonts/vazirmatn-latin-wght-normal.woff2", weight: "100 900", style: "normal" },
+  ],
   variable: "--font-vazirmatn",
   display: "swap",
 });
