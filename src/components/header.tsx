@@ -79,7 +79,7 @@ export function Header() {
         <Link
           href="/"
           className="shrink-0 transition-opacity hover:opacity-85"
-          aria-label="شریفمند — خانه"
+          aria-label="دادبان — خانه"
           onClick={() => {
             // Clicking the logo always goes home; if already there, scroll back to top.
             if (pathname === "/") window.scrollTo({ top: 0, behavior: "smooth" });

@@ -2,8 +2,8 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "شریفمند — پلتفرم خدمات حقوقی",
-    short_name: "شریفمند",
+    name: "دادبان — پلتفرم خدمات حقوقی",
+    short_name: "دادبان",
     description: "وکیل‌یابی، مشاوره آنلاین، تنظیم اسناد و دستیار حقوقی هوش مصنوعی",
     start_url: "/",
     display: "standalone",
@@ -13,6 +13,12 @@ export default function manifest(): MetadataRoute.Manifest {
     dir: "rtl",
     categories: ["legal", "business", "productivity"],
     icons: [
+      {
+        src: "/logo.png",
+        sizes: "512x512",
+        type: "image/png",
+        purpose: "any",
+      },
       {
         src: "/icon.svg",
         sizes: "any",

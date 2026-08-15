@@ -385,7 +385,7 @@ export const articles = pgTable("articles", {
   excerpt: text("excerpt").notNull(),
   content: text("content").notNull(),
   readTime: integer("read_time").notNull().default(5),
-  author: text("author").notNull().default("تیم تحریریه شریفمند"),
+  author: text("author").notNull().default("تیم تحریریه دادبان"),
   authorRole: text("author_role").notNull().default("پژوهشگر حقوق"),
   views: integer("views").notNull().default(0),
   publishedAt: timestamp("published_at").defaultNow().notNull(),

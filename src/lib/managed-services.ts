@@ -26,6 +26,7 @@ import {
 } from "@/db/schema";
 import { eq, sql, desc, and, inArray } from "drizzle-orm";
 import { getCurrentUser } from "@/lib/user-auth";
+import { catalogServiceBySlug, type CatalogService } from "@/lib/managed-catalog";
 
 export const OPERATIVE_ROLES = ["staff", "supervisor", "lawyer", "admin"] as const;
 export type OperativeRole = (typeof OPERATIVE_ROLES)[number];
@@ -232,9 +233,42 @@ export async function getActiveServices(opts?: { featuredOnly?: boolean }) {
     .orderBy(desc(managedServices.featured), managedServices.sortOrder);
 }
 
+function catalogToManaged(s: CatalogService): ManagedService {
+  return {
+    id: 0,
+    title: s.title,
+    slug: s.slug,
+    shortDescription: s.shortDescription,
+    description: s.description,
+    classification: s.classification as ManagedService["classification"],
+    category: s.category as ManagedService["category"],
+    icon: s.icon,
+    estimatedTime: s.estimatedTime,
+    priceType: s.priceType as ManagedService["priceType"],
+    basePrice: s.basePrice,
+    requiresCaseInfo: s.requiresCaseInfo,
+    requiresDocuments: s.requiresDocuments,
+    requiresLawyer: s.requiresLawyer,
+    requiresSupervision: s.requiresSupervision,
+    active: s.active,
+    featured: s.featured,
+    sortOrder: s.sortOrder,
+    formFields: null,
+    requiredDocs: s.requiredDocs ?? null,
+    createdAt: new Date(0),
+    updatedAt: new Date(0),
+  };
+}
+
 export async function getServiceBySlug(slug: string) {
-  const [svc] = await db.select().from(managedServices).where(eq(managedServices.slug, slug)).limit(1);
-  return svc ?? null;
+  try {
+    const [svc] = await db.select().from(managedServices).where(eq(managedServices.slug, slug)).limit(1);
+    if (svc) return svc;
+  } catch (err) {
+    console.error("[dadban] getServiceBySlug failed:", err);
+  }
+  const fallback = catalogServiceBySlug(slug);
+  return fallback ? catalogToManaged(fallback) : null;
 }
 
 export async function listOperatives(roles: string[]) {

@@ -11,7 +11,7 @@ import { getCurrentUser } from "@/lib/user-auth";
 import { CASE_STATUS_FA, buildCaseTimeline, nextActionForCase } from "@/lib/case-facts";
 
 export const metadata: Metadata = {
-  title: "پرونده من — شریفمند",
+  title: "پرونده من — دادبان",
   description: "جزئیات واقعی پرونده، مراحل، مدارک و پرداخت‌های شما.",
 };
 

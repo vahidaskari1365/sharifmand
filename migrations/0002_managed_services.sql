@@ -1,5 +1,5 @@
 -- ============================================================================
--- شریفمند — Migration 0002: Managed Services ("خدمات پیگیری و انجام امور")
+-- دادبان — Migration 0002: Managed Services ("خدمات پیگیری و انجام امور")
 -- Idempotent, reversible-by-design, safe to re-run. Apply with:
 --   psql "$DATABASE_URL" -f migrations/0002_managed_services.sql
 -- (The same DDL is also run automatically on startup by src/lib/auto-seed.ts.)

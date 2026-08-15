@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import { Container } from "@/components/ui";
 
 export const metadata: Metadata = {
-  title: "حریم خصوصی — شریفمند",
-  description: "سیاست حفظ حریم خصوصی کاربران پلتفرم حقوقی شریفمند.",
+  title: "حریم خصوصی — دادبان",
+  description: "سیاست حفظ حریم خصوصی کاربران پلتفرم حقوقی دادبان.",
 };
 
 const SECTIONS = [

@@ -58,10 +58,16 @@ export default async function LawyersPage({
             ? desc(lawyers.reviewCount)
             : desc(lawyers.rating);
 
-  const [list, totalRow] = await Promise.all([
-    db.select().from(lawyers).where(conds.length ? and(...conds) : undefined).orderBy(order, desc(lawyers.verified)),
-    db.select({ c: count() }).from(lawyers).where(conds.length ? and(...conds) : undefined),
-  ]);
+  let list: typeof lawyers.$inferSelect[] = [];
+  let totalRow: { c: number }[] = [{ c: 0 }];
+  try {
+    [list, totalRow] = await Promise.all([
+      db.select().from(lawyers).where(conds.length ? and(...conds) : undefined).orderBy(order, desc(lawyers.verified)),
+      db.select({ c: count() }).from(lawyers).where(conds.length ? and(...conds) : undefined),
+    ]);
+  } catch (err) {
+    console.error("[dadban] lawyers list query failed:", err);
+  }
 
   const heading = sp ? (city ? `وکیل ${sp} در ${city}` : `وکیل ${sp}`) : city ? `وکیل در ${city}` : "همه وکلا";
 
@@ -69,8 +75,8 @@ export default async function LawyersPage({
     "@context": "https://schema.org",
     "@type": "FAQPage",
     mainEntity: [
-      { "@type": "Question", name: `چگونه وکیل${sp ? ` ${sp}` : ""} پیدا کنم؟`, acceptedAnswer: { "@type": "Answer", text: `از صفحه جستجوی وکیل شریفمند با فیلتر تخصص و شهر می‌توانید وکیل${sp ? ` ${sp}` : ""} مناسب پیدا و مشاوره رزرو کنید.` } },
-      { "@type": "Question", name: "آیا وکلای شریفمند احراز هویت شده‌اند؟", acceptedAnswer: { "@type": "Answer", text: "بله، هویت و پروانه همه وکلا توسط کارشناسان شریفمند راستی‌آزمایی می‌شود." } },
+      { "@type": "Question", name: `چگونه وکیل${sp ? ` ${sp}` : ""} پیدا کنم؟`, acceptedAnswer: { "@type": "Answer", text: `از صفحه جستجوی وکیل دادبان با فیلتر تخصص و شهر می‌توانید وکیل${sp ? ` ${sp}` : ""} مناسب پیدا و مشاوره رزرو کنید.` } },
+      { "@type": "Question", name: "آیا وکلای دادبان احراز هویت شده‌اند؟", acceptedAnswer: { "@type": "Answer", text: "بله، هویت و پروانه همه وکلا توسط کارشناسان دادبان راستی‌آزمایی می‌شود." } },
     ],
   };
 

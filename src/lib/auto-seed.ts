@@ -15,6 +15,7 @@ import {
 } from "@/db/schema";
 import { sql } from "drizzle-orm";
 import { hashPassword } from "@/lib/user-auth";
+import { CATALOG_CATEGORIES, CATALOG_SERVICES } from "@/lib/managed-catalog";
 
 const DAY = 86400000;
 const daysAgo = (n: number) => new Date(Date.now() - n * DAY);
@@ -64,10 +65,10 @@ const contractData = [
 ];
 
 const articleData = [
-  { slug: "check-bargasht-che-konim", title: "اگر چک برگشت بخورد چه کار کنیم؟", category: "چک و اسناد", excerpt: "راهنمای گام‌به‌گام پیگیری چک برگشتی؛ از اخذ گواهی عدم پرداخت تا اجرائیه و دادگاه.", content: "وقتی چکی برگشت می‌خورد، دارنده چک گزینه‌های قانونی متعددی برای وصول طلب خود دارد. نخستین گام، مراجعه به بانک و اخذ «گواهی عدم پرداخت» به همراه نسخه اجرائیه است.\n\nپس از اخذ گواهی، دارنده می‌تواند از دو مسیر اقدام کند: مسیر سریع «اجرائیه» از طریق اجرای احکام، و مسیر شکایت کیفری یا حقوقی در دادگاه. اجرائیه معمولاً سریع‌ترین روش وصول وجه است.\n\nباید توجه داشت که برای طرح شکایت کیفری مهلت قانونی وجود دارد و تأخیر می‌تواند موجب سقوط حق شود. همچنین داشتن نشانی دقیق صادرکننده چک برای احضار او ضروری است.\n\nدر نهایت، برای چک‌های صیادی، اطلاعات در سامانه صیاد ثبت و ردیابی می‌شود. مشاوره با وکیل متخصص اسناد تجاری می‌تواند مسیر درست را مشخص کند و زمان و هزینه را بهینه‌سازی نماید.", readTime: 6, author: "تیم تحریریه شریفمند", authorRole: "پژوهشگر حقوق", views: 12400, publishedAt: daysAgo(4) },
+  { slug: "check-bargasht-che-konim", title: "اگر چک برگشت بخورد چه کار کنیم؟", category: "چک و اسناد", excerpt: "راهنمای گام‌به‌گام پیگیری چک برگشتی؛ از اخذ گواهی عدم پرداخت تا اجرائیه و دادگاه.", content: "وقتی چکی برگشت می‌خورد، دارنده چک گزینه‌های قانونی متعددی برای وصول طلب خود دارد. نخستین گام، مراجعه به بانک و اخذ «گواهی عدم پرداخت» به همراه نسخه اجرائیه است.\n\nپس از اخذ گواهی، دارنده می‌تواند از دو مسیر اقدام کند: مسیر سریع «اجرائیه» از طریق اجرای احکام، و مسیر شکایت کیفری یا حقوقی در دادگاه. اجرائیه معمولاً سریع‌ترین روش وصول وجه است.\n\nباید توجه داشت که برای طرح شکایت کیفری مهلت قانونی وجود دارد و تأخیر می‌تواند موجب سقوط حق شود. همچنین داشتن نشانی دقیق صادرکننده چک برای احضار او ضروری است.\n\nدر نهایت، برای چک‌های صیادی، اطلاعات در سامانه صیاد ثبت و ردیابی می‌شود. مشاوره با وکیل متخصص اسناد تجاری می‌تواند مسیر درست را مشخص کند و زمان و هزینه را بهینه‌سازی نماید.", readTime: 6, author: "تیم تحریریه دادبان", authorRole: "پژوهشگر حقوق", views: 12400, publishedAt: daysAgo(4) },
   { slug: "marahel-talaq-tavafoghi", title: "مراحل طلاق توافقی در چند گام ساده", category: "خانواده", excerpt: "طلاق توافقی سریع‌ترین مسیر جدایی است؛ در این مقاله مراحل کامل آن را مرور می‌کنیم.", content: "طلاق توافقی زمانی مطرح می‌شود که زوجین در مورد تمام امور از جمله مهریه، نفقه، اجرت‌المثل و حضانت فرزندان به توافق رسیده باشند. این نوع طلاق بسیار سریع‌تر و کم‌هزینه‌تر از طلاق یک‌طرفه است.\n\nنخستین گام، توافق کتبی روی امور مالی و حضانت است. سپس دادخواست طلاق توافقی در دادگاه خانواده ثبت می‌شود. دادگاه پس از بررسی، جلسه‌ای تعیین و در صورت تأیید توافق، گواهی عدم امکان سازش صادر می‌کند.\n\nپس از صدور گواهی، طلاق باید در محضر رسمی ثبت شود تا آثار حقوقی کامل پیدا کند. در طول این فرایند، مراجعه به مشاور خانواده الزامی است.\n\nبا کمک وکیل متخصص خانواده می‌توان پیش‌نویس توافق‌نامه را دقیق تنظیم کرد تا از توقف فرایند در مراحل بعدی جلوگیری شود.", readTime: 5, author: "دکتر لیلا صادقی", authorRole: "وکیل پایه یک", views: 9800, publishedAt: daysAgo(9) },
   { slug: "aghrarname-ejare-amin", title: "چگونه قرارداد اجاره امن ببندیم؟", category: "ملک", excerpt: "نکات کلیدی برای بستن قرارداد اجاره‌ای که حقوق موجر و مستأجر را حفظ می‌کند.", content: "قرارداد اجاره یکی از پرکاربردترین قراردادهای حقوقی است. یک قرارداد خوب باید مشخصات دقیق ملک، مبلغ ودیعه و اجاره‌بها، مدت اجاره و شرط تخلیه را به‌طور روشن ذکر کند.\n\nیکی از مهم‌ترین بندها، «شرط تخلیه» است که به موجر اجازه می‌دهد در صورت عدم پرداخت اجاره‌بها، فرایند تخلیه را از طریق شورای حل اختلاف پیگیری کند. نبود این شرط، تخلیه را بسیار دشوار می‌سازد.\n\nهمچنین تعیین اینکه کدام طرف مسئول پرداخت شارژ، آب، برق و گاز است، باید مشخص باشد. تاریخ دقیق پرداخت اجاره‌بها نیز از اختلافات جلوگیری می‌کند.\n\nثبت قرارداد در سامانه اجاره و استفاده از فرمت قراردادهای رسمی، حقوق طرفین را تقویت می‌کند. مشاوره با وکیل ملکی پیش از امضا، ریسک‌ها را به حداقل می‌رساند.", readTime: 4, author: "ندا کریمی", authorRole: "وکیل پایه یک", views: 7600, publishedAt: daysAgo(15) },
-  { slug: "tafavot-vakil-payeh-yek-moshaver", title: "تفاوت وکیل پایه یک و مشاور حقوقی چیست؟", category: "آموزش", excerpt: "بسیاری این دو عنوان را اشتباه می‌گیرند؛ در این مقاله تفاوت‌های حقوقی و کاربردی را توضیح می‌دهیم.", content: "وکیل پایه یک دادگستری شخصی است که پس از طی دوره کارآموزی و قبولی در آزمون کانون وکلا، پروانه وکالت دریافت کرده و حق دادرسی و نمایندگی در دادگاه‌ها را دارد.\n\nدر مقابل، مشاور حقوقی لزوماً پروانه وکالت ندارد و نقش او مشاوره‌ای است؛ یعنی می‌تواند نظرات حقوقی ارائه دهد اما معمولاً حق نمایندگی قضایی در دادگاه را نخواهد داشت.\n\nاین تفاوت در پرونده‌های دادگاهی اهمیت زیادی دارد؛ تنها وکیل دارای پروانه می‌تواند در جلسات دادگاه حاضر شود و دفاع کند.\n\nبنابراین پیش از سپردن پرونده، از داشتن پروانه وکالت معتبر و عضویت در کانون وکلا اطمینان حاصل کنید. در پلتفرم شریفمند، همه وکلا احراز هویت و پروانه آن‌ها راستی‌آزمایی می‌شود.", readTime: 4, author: "تیم تحریریه شریفمند", authorRole: "پژوهشگر حقوق", views: 11200, publishedAt: daysAgo(20) },
+  { slug: "tafavot-vakil-payeh-yek-moshaver", title: "تفاوت وکیل پایه یک و مشاور حقوقی چیست؟", category: "آموزش", excerpt: "بسیاری این دو عنوان را اشتباه می‌گیرند؛ در این مقاله تفاوت‌های حقوقی و کاربردی را توضیح می‌دهیم.", content: "وکیل پایه یک دادگستری شخصی است که پس از طی دوره کارآموزی و قبولی در آزمون کانون وکلا، پروانه وکالت دریافت کرده و حق دادرسی و نمایندگی در دادگاه‌ها را دارد.\n\nدر مقابل، مشاور حقوقی لزوماً پروانه وکالت ندارد و نقش او مشاوره‌ای است؛ یعنی می‌تواند نظرات حقوقی ارائه دهد اما معمولاً حق نمایندگی قضایی در دادگاه را نخواهد داشت.\n\nاین تفاوت در پرونده‌های دادگاهی اهمیت زیادی دارد؛ تنها وکیل دارای پروانه می‌تواند در جلسات دادگاه حاضر شود و دفاع کند.\n\nبنابراین پیش از سپردن پرونده، از داشتن پروانه وکالت معتبر و عضویت در کانون وکلا اطمینان حاصل کنید. در پلتفرم دادبان، همه وکلا احراز هویت و پروانه آن‌ها راستی‌آزمایی می‌شود.", readTime: 4, author: "تیم تحریریه دادبان", authorRole: "پژوهشگر حقوق", views: 11200, publishedAt: daysAgo(20) },
   { slug: "shakayat-kolahbardari", title: "مراحل شکایت از کلاهبرداری", category: "کیفری", excerpt: "اگر قربانی کلاهبرداری شده‌اید، این راهنمای گام‌به‌گام را دنبال کنید.", content: "کلاهبرداری یکی از جرایم رایج است که در آن شخص با فریب، مال دیگری را به‌تصرف درمی‌آورد. نخستین گام پس از اطمینان از وقوع جرم، جمع‌آوری ادله شامل پیام‌ها، رسیدها و شهود است.\n\nسپس شکایت در دفاتر خدمات الکترونیک قضایی ثبت و به دادسرای صالح ارجاع می‌شود. در شکایت، باید وقایع به‌طور دقیق و با ذکر زمان، مکان و اشخاص توصیف شود.\n\nدادسرا پس از تحقیق، در صورت احراز اولیه، کیفرخواست صادر و پرونده به دادگاه کیفری ارسال می‌گردد. در طول فرایند، داشتن وکیل کیفری می‌تواند در جمع‌آوری ادله و دفاع مؤثر باشد.\n\nتوجه داشته باشید که سرعت در اقدام و حفظ ادله دیجیتال، نقش مهمی در نتیجه پرونده دارد.", readTime: 5, author: "حسین علمداری", authorRole: "وکیل پایه یک", views: 8900, publishedAt: daysAgo(25) },
   { slug: "sabt-brand-hoghoghi", title: "نکات حقوقی ثبت برند و علامت تجاری", category: "شرکت‌ها", excerpt: "چرا ثبت برند اهمیت دارد و چه مراحلی دارد؟ راهنمای کارآفرینان.", content: "ثبت برند یا علامت تجاری، هویت منحصربه‌فرد کسب‌وکار شما را قانوناً محافظت می‌کند و مانع استفاده دیگران از نام و لوگوی شما می‌شود.\n\nبرای ثبت، ابتدا باید از عدم تشابه برند با علائم ثبت‌شده قبلی اطمینان حاصل کنید. سپس درخواست ثبت در سازمان مالکیت معنوی ثبت می‌شود.\n\nپس از بررسی کارشناسان و رفع نقص‌های احتمالی، برند به نام شما ثبت و گواهی صادر می‌گردد. این ثبت معمولاً برای ۱۰ سال معتبر است.\n\nعدم ثبت برند، ریسک سوءاستفاده و حتی از دست دادن نام تجاری را به همراه دارد. مشاوره با وکیل مالکیت فکری می‌تواند روند ثبت را تسریع و از رد درخواست جلوگیری کند.", readTime: 5, author: "نگار سلیمانی", authorRole: "وکیل پایه یک", views: 6400, publishedAt: daysAgo(30) },
   { slug: "hoghogh-kargar-ekhraj", title: "حقوق کارگر در صورت اخراج نابجا", category: "کار", excerpt: "اگر به‌ناحق اخراج شده‌اید، چه حقوقی دارید و چگونه اقدام کنید؟", content: "اخراج نابجا یکی از رایج‌ترین اختلافات کارگری است. طبق قانون کار، کارفرما تنها با دلایل موجه و رعایت تشریفات می‌تواند قرارداد کار را فسخ کند.\n\nکارگری که به‌ناحق اخراج شده، می‌تواند ظرف مهلت قانونی در اداره کار شکایت ثبت کند. هیأت تشخیص ابتدا رسیدگی و در صورت لزوم پرونده به هیأت حل اختلاف ارجاع می‌شود.\n\nدر صورت احراز اخراج نابجا، حکم به بازگشت به کار یا پرداخت حقوق ایام بی‌کاری و سنوات داده می‌شود. داشتن قرارداد کار و فیش حقوقی ادله مهمی هستند.\n\nمشاوره با وکیل متخصص حقوق کار می‌تواند شانس موفقیت در اداره کار را افزایش دهد.", readTime: 4, author: "فاطمه نوری", authorRole: "وکیل پایه یک", views: 7200, publishedAt: daysAgo(33) },
@@ -99,7 +100,7 @@ const DDL = [
   `CREATE TABLE IF NOT EXISTS lawyers (id SERIAL PRIMARY KEY, slug TEXT NOT NULL UNIQUE, name TEXT NOT NULL, avatar_color TEXT NOT NULL DEFAULT '#15365d', title TEXT NOT NULL DEFAULT 'وکیل پایه یک دادگستری', license_no TEXT NOT NULL, city TEXT NOT NULL, province TEXT NOT NULL, gender TEXT NOT NULL DEFAULT 'male', experience_years INTEGER NOT NULL DEFAULT 0, specialties TEXT[] NOT NULL DEFAULT '{}', rating REAL NOT NULL DEFAULT 0, review_count INTEGER NOT NULL DEFAULT 0, case_count INTEGER NOT NULL DEFAULT 0, price_chat INTEGER NOT NULL DEFAULT 0, price_voice INTEGER NOT NULL DEFAULT 0, price_video INTEGER NOT NULL DEFAULT 0, verified BOOLEAN NOT NULL DEFAULT true, top_rated BOOLEAN NOT NULL DEFAULT false, fast_responder BOOLEAN NOT NULL DEFAULT false, contract_expert BOOLEAN NOT NULL DEFAULT false, response_time TEXT NOT NULL DEFAULT 'کمتر از یک ساعت', bio TEXT NOT NULL DEFAULT '', about TEXT NOT NULL DEFAULT '', services TEXT[] NOT NULL DEFAULT '{}', views INTEGER NOT NULL DEFAULT 0, featured BOOLEAN NOT NULL DEFAULT false, created_at TIMESTAMP NOT NULL DEFAULT now())`,
   `CREATE TABLE IF NOT EXISTS reviews (id SERIAL PRIMARY KEY, lawyer_id INTEGER NOT NULL REFERENCES lawyers(id) ON DELETE CASCADE, client_name TEXT NOT NULL, rating INTEGER NOT NULL, comment TEXT NOT NULL, service TEXT, created_at TIMESTAMP NOT NULL DEFAULT now())`,
   `CREATE TABLE IF NOT EXISTS contracts (id SERIAL PRIMARY KEY, slug TEXT NOT NULL UNIQUE, title TEXT NOT NULL, category TEXT NOT NULL, icon TEXT NOT NULL DEFAULT 'file', description TEXT NOT NULL, use_case TEXT NOT NULL, risks TEXT[] NOT NULL DEFAULT '{}', key_clauses TEXT[] NOT NULL DEFAULT '{}', sample_price INTEGER NOT NULL DEFAULT 0, custom_price INTEGER NOT NULL DEFAULT 0, popular BOOLEAN NOT NULL DEFAULT false, steps TEXT[] NOT NULL DEFAULT '{}')`,
-  `CREATE TABLE IF NOT EXISTS articles (id SERIAL PRIMARY KEY, slug TEXT NOT NULL UNIQUE, title TEXT NOT NULL, category TEXT NOT NULL, excerpt TEXT NOT NULL, content TEXT NOT NULL, read_time INTEGER NOT NULL DEFAULT 5, author TEXT NOT NULL DEFAULT 'تیم تحریریه شریفمند', author_role TEXT NOT NULL DEFAULT 'پژوهشگر حقوق', views INTEGER NOT NULL DEFAULT 0, published_at TIMESTAMP NOT NULL DEFAULT now())`,
+  `CREATE TABLE IF NOT EXISTS articles (id SERIAL PRIMARY KEY, slug TEXT NOT NULL UNIQUE, title TEXT NOT NULL, category TEXT NOT NULL, excerpt TEXT NOT NULL, content TEXT NOT NULL, read_time INTEGER NOT NULL DEFAULT 5, author TEXT NOT NULL DEFAULT 'تیم تحریریه دادبان', author_role TEXT NOT NULL DEFAULT 'پژوهشگر حقوق', views INTEGER NOT NULL DEFAULT 0, published_at TIMESTAMP NOT NULL DEFAULT now())`,
   `CREATE TABLE IF NOT EXISTS qa_questions (id SERIAL PRIMARY KEY, slug TEXT NOT NULL UNIQUE, question TEXT NOT NULL, body TEXT NOT NULL DEFAULT '', answer TEXT NOT NULL, category TEXT NOT NULL, lawyer_name TEXT NOT NULL, lawyer_title TEXT NOT NULL DEFAULT 'وکیل پایه یک', verified BOOLEAN NOT NULL DEFAULT true, helpful INTEGER NOT NULL DEFAULT 0, views INTEGER NOT NULL DEFAULT 0, created_at TIMESTAMP NOT NULL DEFAULT now())`,
   `CREATE TABLE IF NOT EXISTS cases (id SERIAL PRIMARY KEY, case_number TEXT NOT NULL, subject TEXT NOT NULL, description TEXT NOT NULL, city TEXT NOT NULL, stage TEXT NOT NULL DEFAULT 'ثبت اولیه', budget TEXT, contact_name TEXT NOT NULL, contact_phone TEXT NOT NULL, status case_status NOT NULL DEFAULT 'new', created_at TIMESTAMP NOT NULL DEFAULT now())`,
   `CREATE TABLE IF NOT EXISTS consultations (id SERIAL PRIMARY KEY, lawyer_name TEXT, lawyer_id INTEGER, type consultation_type NOT NULL DEFAULT 'chat', duration INTEGER NOT NULL DEFAULT 30, client_name TEXT NOT NULL, client_phone TEXT NOT NULL, subject TEXT NOT NULL, scheduled_at TEXT, price NUMERIC(12,0) NOT NULL DEFAULT '0', status consultation_status NOT NULL DEFAULT 'pending', created_at TIMESTAMP NOT NULL DEFAULT now())`,
@@ -166,264 +167,13 @@ export interface SeedCounts {
   qa: number;
 }
 
-/* ----------------------------- Managed Services seed ----------------------------- */
-const managedCategoryData: {
-  slug: string;
-  name: string;
-  description: string;
-  icon: string;
-  sortOrder: number;
-}[] = [
-  { slug: "CASE_FOLLOW_UP", name: "پیگیری پرونده و درخواست", description: "پیگیری وضعیت پرونده و درخواست‌های ثبت‌شده در مراجع قضایی.", icon: "folder", sortOrder: 1 },
-  { slug: "JUDICIAL_OPERATIONS", name: "امور قضایی و اجرای احکام", description: "پیگیری امور اجرای احکام، ابلاغ‌ها و اقدامات قضایی.", icon: "gavel", sortOrder: 2 },
-  { slug: "ENFORCEMENT", name: "اجرای احکام و توقیف", description: "پیگیری برگه‌های اجرایی، توقیف اموال و اقدامات اجرایی.", icon: "balance", sortOrder: 3 },
-  { slug: "REGISTRATION", name: "امور ثبتی", description: "پیگیری استعلام‌ها و امور اداره ثبت.", icon: "stamp", sortOrder: 4 },
-  { slug: "TAX", name: "امور مالیاتی", description: "پیگیری برگه‌های تشخیص، اعتراض و پرداخت مالیاتی.", icon: "calculator", sortOrder: 5 },
-  { slug: "ADMINISTRATIVE", name: "امور اداری و سازمانی", description: "انجام درخواست‌های اداری قابل واگذاری.", icon: "building", sortOrder: 6 },
-  { slug: "DOCUMENTS", name: "مدارک و اسناد", description: "تهیه، دریافت و بررسی مدارک و اسناد.", icon: "document", sortOrder: 7 },
-  { slug: "ORGANIZATIONS", name: "پیگیری از سازمان‌ها و مراجع", description: "پیگیری درخواست از سازمان یا مرجع مشخص.", icon: "landmark", sortOrder: 8 },
-  { slug: "OTHER", name: "سایر خدمات", description: "سایر خدماتی که پیش از انتشار تأیید شده‌اند.", icon: "briefcase", sortOrder: 9 },
-];
-
-const managedServiceData: {
-  title: string;
-  slug: string;
-  shortDescription: string;
-  description: string;
-  classification: string;
-  category: string;
-  icon: string;
-  estimatedTime: string;
-  priceType: string;
-  basePrice: number;
-  requiresCaseInfo: boolean;
-  requiresDocuments: boolean;
-  requiresLawyer: boolean;
-  requiresSupervision: boolean;
-  active: boolean;
-  featured: boolean;
-  sortOrder: number;
-  requiredDocs?: string[];
-}[] = [
-  {
-    title: "پیگیری وضعیت پرونده",
-    slug: "case-followup",
-    shortDescription: "وضعیت پرونده خود را در جریان رسیدگی پیگیری کنید.",
-    description: "کارشناسان شریفمند شماره پرونده و مرجع را دریافت کرده و وضعیت جاری، ابلاغ‌ها و گام بعدی را پیگیری و گزارش می‌دهند.",
-    classification: "INFORMATIONAL",
-    category: "CASE_FOLLOW_UP",
-    icon: "folder",
-    estimatedTime: "۲ تا ۵ روز کاری",
-    priceType: "FROM",
-    basePrice: 350000,
-    requiresCaseInfo: true,
-    requiresDocuments: false,
-    requiresLawyer: false,
-    requiresSupervision: false,
-    active: true,
-    featured: true,
-    sortOrder: 1,
-  },
-  {
-    title: "پیگیری امور اجرای احکام",
-    slug: "enforcement-followup",
-    shortDescription: "وضعیت اجرای حکم و ابلاغ‌ها را پیگیری کنید.",
-    description: "درخواست پیگیری برگه اجرایی، وضعیت ابلاغ و اقدامات اجرایی ثبت شود تا توسط کارشناسان دنبال شود.",
-    classification: "ADMINISTRATIVE",
-    category: "JUDICIAL_OPERATIONS",
-    icon: "gavel",
-    estimatedTime: "۳ تا ۷ روز کاری",
-    priceType: "FROM",
-    basePrice: 450000,
-    requiresCaseInfo: true,
-    requiresDocuments: false,
-    requiresLawyer: false,
-    requiresSupervision: false,
-    active: true,
-    featured: true,
-    sortOrder: 2,
-  },
-  {
-    title: "پیگیری توقیف و اجراییه",
-    slug: "enforcement-tracking",
-    shortDescription: "برگه‌های اجرایی و توقیف اموال را پیگیری کنید.",
-    description: "پیگیری وضعیت برگه اجرایی، توقیف اموال و اقدامات مرتبط با اجرای احکام در واحدهای اجرایی.",
-    classification: "ADMINISTRATIVE",
-    category: "ENFORCEMENT",
-    icon: "balance",
-    estimatedTime: "۳ تا ۷ روز کاری",
-    priceType: "FROM",
-    basePrice: 450000,
-    requiresCaseInfo: true,
-    requiresDocuments: false,
-    requiresLawyer: false,
-    requiresSupervision: false,
-    active: true,
-    featured: false,
-    sortOrder: 3,
-  },
-  {
-    title: "پیگیری امور ثبتی",
-    slug: "registration-followup",
-    shortDescription: "استعلام‌ها و امور اداره ثبت را پیگیری کنید.",
-    description: "پیگیری درخواست‌های ثبتی، استعلام‌ها و مراحل انتقال در اداره ثبت اسناد و املاک.",
-    classification: "ADMINISTRATIVE",
-    category: "REGISTRATION",
-    icon: "stamp",
-    estimatedTime: "۳ تا ۱۰ روز کاری",
-    priceType: "FROM",
-    basePrice: 300000,
-    requiresCaseInfo: true,
-    requiresDocuments: false,
-    requiresLawyer: false,
-    requiresSupervision: false,
-    active: true,
-    featured: false,
-    sortOrder: 4,
-  },
-  {
-    title: "پیگیری امور مالیاتی",
-    slug: "tax-followup",
-    shortDescription: "برگه تشخیص و اعتراض مالیاتی را پیگیری کنید.",
-    description: "پیگیری برگه‌های تشخیص، اعتراض به کمیسیون‌های مالیاتی و پیگیری پرونده‌های مالیاتی با نظارت حرفه‌ای.",
-    classification: "PROFESSIONAL_LEGAL",
-    category: "TAX",
-    icon: "calculator",
-    estimatedTime: "۵ تا ۱۲ روز کاری",
-    priceType: "FROM",
-    basePrice: 500000,
-    requiresCaseInfo: true,
-    requiresDocuments: true,
-    requiresLawyer: true,
-    requiresSupervision: true,
-    active: true,
-    featured: false,
-    sortOrder: 5,
-    requiredDocs: ["برگه تشخیص مالیاتی", "اظهارنامه", "مدارک هویتی"],
-  },
-  {
-    title: "پیگیری درخواست اداری مشخص",
-    slug: "administrative-request",
-    shortDescription: "یک درخواست اداری مشخص را واگذار کنید.",
-    description: "درخواست‌های اداری تعریف‌شده (مانند استعلام، دریافت گواهی، پیگیری نامه) که نیازمند حضور شما نیست واگذار شود.",
-    classification: "ADMINISTRATIVE",
-    category: "ADMINISTRATIVE",
-    icon: "building",
-    estimatedTime: "۲ تا ۶ روز کاری",
-    priceType: "FROM",
-    basePrice: 250000,
-    requiresCaseInfo: false,
-    requiresDocuments: true,
-    requiresLawyer: false,
-    requiresSupervision: false,
-    active: true,
-    featured: false,
-    sortOrder: 6,
-  },
-  {
-    title: "پیگیری از سازمان یا مرجع مشخص",
-    slug: "org-followup",
-    shortDescription: "درخواست خود را از یک سازمان پیگیری کنید.",
-    description: "پیگیری یک درخواست یا نامه از سازمان یا مرجع مشخص (با ذکر نام سازمان، واحد و شماره پیگیری).",
-    classification: "INFORMATIONAL",
-    category: "ORGANIZATIONS",
-    icon: "landmark",
-    estimatedTime: "۲ تا ۶ روز کاری",
-    priceType: "FROM",
-    basePrice: 250000,
-    requiresCaseInfo: false,
-    requiresDocuments: true,
-    requiresLawyer: false,
-    requiresSupervision: false,
-    active: true,
-    featured: false,
-    sortOrder: 7,
-  },
-  {
-    title: "تهیه و دریافت مدارک",
-    slug: "doc-prep",
-    shortDescription: "دریافت یا تهیه مدرک موردنیاز را واگذار کنید.",
-    description: "دریافت گواهی‌ها، استعلام‌ها یا تهیه نسخه‌های رسمی مدارک از مراجع ذی‌ربط.",
-    classification: "DOCUMENT_SERVICE",
-    category: "DOCUMENTS",
-    icon: "document",
-    estimatedTime: "۱ تا ۴ روز کاری",
-    priceType: "FIXED",
-    basePrice: 200000,
-    requiresCaseInfo: false,
-    requiresDocuments: false,
-    requiresLawyer: false,
-    requiresSupervision: false,
-    active: true,
-    featured: false,
-    sortOrder: 8,
-  },
-  {
-    title: "بررسی و تکمیل مدارک",
-    slug: "doc-review",
-    shortDescription: "مدارک خود را بررسی و تکمیل کنید.",
-    description: "بررسی کامل بودن مدارک، رفع نقص و آماده‌سازی پوشه مدارک برای ارائه به مرجع.",
-    classification: "DOCUMENT_SERVICE",
-    category: "DOCUMENTS",
-    icon: "file",
-    estimatedTime: "۱ تا ۳ روز کاری",
-    priceType: "FIXED",
-    basePrice: 150000,
-    requiresCaseInfo: false,
-    requiresDocuments: true,
-    requiresLawyer: false,
-    requiresSupervision: false,
-    active: true,
-    featured: false,
-    sortOrder: 9,
-  },
-  {
-    title: "ارجاع به وکیل واجد صلاحیت",
-    slug: "lawyer-referral",
-    shortDescription: "درخواستی که نیازمند اقدام حرفه‌ای است به وکیل ارجاع می‌شود.",
-    description: "اگر بررسی نشان دهد موضوع نیازمند وکیل یا اقدام حرفه‌ای حقوقی است، شریفمند آن را به وکیل دارای صلاحیت یا مجموعه حقوقی مربوط ارجاع می‌دهد. هزینه پس از بررسی اعلام می‌شود.",
-    classification: "PROFESSIONAL_LEGAL",
-    category: "OTHER",
-    icon: "user",
-    estimatedTime: "بر اساس نظر وکیل",
-    priceType: "REQUIRES_REVIEW",
-    basePrice: 0,
-    requiresCaseInfo: true,
-    requiresDocuments: true,
-    requiresLawyer: true,
-    requiresSupervision: true,
-    active: true,
-    featured: true,
-    sortOrder: 10,
-  },
-  {
-    title: "انجام امور اداری قابل واگذاری",
-    slug: "general-managed-task",
-    shortDescription: "کارهای زمان‌بر اداری را به ما بسپارید.",
-    description: "امور اداری مشخصی که قابل واگذاری است و پیش از انتشار توسط مدیریت تأیید شده‌اند. جزئیات بررسی و هزینه نهایی اعلام می‌شود.",
-    classification: "REQUIRES_REVIEW",
-    category: "OTHER",
-    icon: "briefcase",
-    estimatedTime: "بر اساس نوع کار",
-    priceType: "REQUIRES_REVIEW",
-    basePrice: 0,
-    requiresCaseInfo: false,
-    requiresDocuments: false,
-    requiresLawyer: false,
-    requiresSupervision: false,
-    active: true,
-    featured: true,
-    sortOrder: 11,
-  },
-];
-
 /** Seed categories + services once (idempotent). */
 export async function seedManagedServices(): Promise<void> {
   try {
-    for (const c of managedCategoryData) {
+    for (const c of CATALOG_CATEGORIES) {
       await db.insert(serviceCategories).values(c).onConflictDoNothing({ target: serviceCategories.slug });
     }
-    for (const s of managedServiceData) {
+    for (const s of CATALOG_SERVICES) {
       await db.insert(managedServices).values(s as any).onConflictDoNothing({ target: managedServices.slug });
     }
   } catch {
@@ -436,9 +186,9 @@ export async function seedManagedServices(): Promise<void> {
 export async function seedDemoOperators(): Promise<void> {
   if (process.env.NODE_ENV === "production") return;
   const demo = [
-    { phone: "09000000001", name: "کارشناس عملیات شریفمند", role: "staff" },
+    { phone: "09000000001", name: "کارشناس عملیات دادبان", role: "staff" },
     { phone: "09000000002", name: "دکتر ناظر حقوقی", role: "lawyer" },
-    { phone: "09000000003", name: "ناظر ارشد شریفمند", role: "supervisor" },
+    { phone: "09000000003", name: "ناظر ارشد دادبان", role: "supervisor" },
   ];
   for (const d of demo) {
     try {
@@ -447,7 +197,7 @@ export async function seedDemoOperators(): Promise<void> {
         .values({
           name: d.name,
           phone: d.phone,
-          email: `${d.role}@demo.sharifmand.local`,
+          email: `${d.role}@demo.dadban.local`,
           passwordHash: hashPassword("demo1234"),
           role: d.role,
         })
@@ -491,6 +241,25 @@ export async function seedAll(): Promise<SeedCounts> {
  * Safe to run on every server start.
  */
 export async function ensureSeeded(): Promise<{ seeded: boolean; counts: SeedCounts }> {
+  // Fast path: if core tables already exist, skip the 50+ DDL statements that
+  // otherwise run on every serverless cold start and exhaust the connection pool.
+  try {
+    const existing = await db.execute(sql`SELECT COUNT(*)::int AS c FROM lawyers`);
+    const existingRows = (existing as { rows?: unknown[] }).rows ?? [];
+    const existingCount = Number((existingRows[0] as { c?: number })?.c ?? 0);
+    if (existingCount > 0) {
+      try {
+        await seedManagedServices();
+        await seedDemoOperators();
+      } catch {
+        /* non-fatal */
+      }
+      return { seeded: false, counts: getCounts() };
+    }
+  } catch {
+    /* tables missing — fall through to full DDL */
+  }
+
   for (const stmt of DDL) {
     try {
       await db.execute(sql.raw(stmt));

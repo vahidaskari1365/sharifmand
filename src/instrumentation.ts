@@ -6,9 +6,9 @@ export async function register() {
     const { ensureSeeded } = await import("./lib/auto-seed");
     const res = await ensureSeeded();
     if (res.seeded) {
-      console.log("[sharifmand] auto-seed: database provisioned with seed data.");
+      console.log("[dadban] auto-seed: database provisioned with seed data.");
     }
   } catch (e) {
-    console.error("[sharifmand] auto-seed failed:", e);
+    console.error("[dadban] auto-seed failed:", e);
   }
 }

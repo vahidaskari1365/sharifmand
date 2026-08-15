@@ -28,7 +28,7 @@ const COLS: { title: string; links: { label: string; href: string }[] }[] = [
   {
     title: "پلتفرم",
     links: [
-      { label: "درباره شریفمند", href: "/about" },
+      { label: "درباره دادبان", href: "/about" },
       { label: "برای کسب‌وکارها", href: "/business" },
       { label: "پنل موکل", href: "/dashboard/client" },
       { label: "پنل وکیل", href: "/dashboard/lawyer" },
@@ -63,13 +63,13 @@ export function Footer() {
           <div>
             <Link
               href="/"
-              aria-label="شریفمند — صفحه اصلی"
+              aria-label="دادبان — صفحه اصلی"
               className="inline-block transition-opacity hover:opacity-85"
             >
               <Logo />
             </Link>
             <p className="mt-4 max-w-xs text-sm leading-7 text-muted">
-              شریفمند، پلتفرم هوشمند خدمات حقوقی؛ از پیدا کردن وکیل متخصص و رزرو مشاوره تا مدیریت
+              دادبان، پلتفرم هوشمند خدمات حقوقی؛ از پیدا کردن وکیل متخصص و رزرو مشاوره تا مدیریت
               پرونده، تنظیم اسناد و دستیار حقوقی هوش مصنوعی — همه در یک‌جا.
             </p>
             <div className="mt-5 grid grid-cols-2 gap-2">
@@ -102,7 +102,7 @@ export function Footer() {
 
         <div className="mt-10 flex flex-col items-center justify-between gap-4 border-t border-border pt-6 sm:flex-row">
           <p className="text-xs text-muted">
-            © {new Intl.NumberFormat("fa-IR", { useGrouping: false }).format(new Date().getFullYear())} شریفمند — تمامی حقوق محفوظ است.
+            © {new Intl.NumberFormat("fa-IR", { useGrouping: false }).format(new Date().getFullYear())} دادبان — تمامی حقوق محفوظ است.
           </p>
           <p className="text-xs text-muted">
             محتوای این پلتفرم صرفاً جنبه راهنمایی دارد و جایگزین مشاوره تخصصی وکیل نیست.
