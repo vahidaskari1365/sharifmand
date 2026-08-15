@@ -30,7 +30,7 @@ export const metadata: Metadata = {
     "وکیل", "مشاوره حقوقی آنلاین", "وکیل خانواده", "وکیل ملکی", "وکیل کیفری",
     "تنظیم قرارداد", "چک برگشتی", "طلاق", "ثبت شرکت", "مشاوره وکیل", "دادبان",
   ],
-  icons: { icon: "/logo.png", apple: "/logo.png" },
+  icons: { icon: "/logo1.png", apple: "/logo1.png" },
   alternates: { canonical: "/" },
   openGraph: {
     type: "website",

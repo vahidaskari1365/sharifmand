@@ -135,7 +135,7 @@ export function Logo({ withText = true }: { withText?: boolean }) {
     <span className="inline-flex items-center gap-2.5">
       <span className="relative inline-flex h-10 w-10 overflow-hidden rounded-xl shadow-md ring-1 ring-black/5">
         <Image
-          src="/logo.png"
+          src="/logo1.png"
           alt={SITE_NAME}
           width={40}
           height={40}
