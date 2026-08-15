@@ -132,14 +132,15 @@ export function Avatar({
 
 export function Logo({ withText = true }: { withText?: boolean }) {
   return (
-    <span className="inline-flex items-center gap-2.5">
-      <span className="relative inline-flex h-10 w-10 overflow-hidden rounded-xl shadow-md ring-1 ring-black/5">
+    <span className="inline-flex items-center gap-3">
+      <span className="relative inline-flex h-12 w-12 shrink-0 overflow-hidden rounded-xl shadow-md ring-1 ring-black/5 sm:h-14 sm:w-14">
         <Image
           src="/logo1.png"
           alt={SITE_NAME}
-          width={40}
-          height={40}
-          className="h-10 w-10 object-cover"
+          width={56}
+          height={56}
+          sizes="(min-width: 640px) 56px, 48px"
+          className="h-full w-full object-cover"
           priority
         />
       </span>
