@@ -1,95 +1,121 @@
 import type { Metadata } from "next";
-import Link from "next/link";
-import { PageHero } from "@/components/page-hero";
-import { Container, Card, Button } from "@/components/ui";
+import { redirect } from "next/navigation";
+import { db } from "@/db";
+import { managedServices, serviceCategories } from "@/db/schema";
+import { eq, desc } from "drizzle-orm";
+import { Container, SectionHeading, Card, Badge, Button } from "@/components/ui";
 import { Icon } from "@/components/icons";
-import { Reveal } from "@/components/reveal";
-import { SERVICE_CATEGORIES, SERVICE_STEPS } from "@/lib/content";
+import type { IconKey } from "@/lib/data";
+import { getCurrentUser } from "@/lib/user-auth";
+import { ServiceCard } from "@/components/managed";
 
 export const metadata: Metadata = {
-  title: "خدمات حقوقی",
-  description:
-    "تمام خدمات حقوقی شریفمند در یک‌جا: خانواده، ملکی، کیفری، تجاری و اداری؛ از مشاوره و وکالت تا تنظیم قرارداد و اسناد.",
-  alternates: { canonical: "/services" },
+  title: "خدمات پیگیری و انجام امور — شریفمند",
+  description: "پیگیری پرونده‌ها، امور اداری، ثبتی، مالیاتی و اجرای احکام را به کارشناسان شریفمند بسپارید.",
 };
+export const dynamic = "force-dynamic";
 
-export default function ServicesPage() {
+export default async function ServicesCatalog() {
+  const user = await getCurrentUser();
+  let categories: { slug: string; name: string; description: string; icon: string }[] = [];
+  let services: any[] = [];
+  try {
+    [categories, services] = await Promise.all([
+      db.select().from(serviceCategories).where(eq(serviceCategories.active, true)).orderBy(serviceCategories.sortOrder),
+      db
+        .select()
+        .from(managedServices)
+        .where(eq(managedServices.active, true))
+        .orderBy(desc(managedServices.featured), managedServices.sortOrder),
+    ]);
+  } catch {
+    /* degraded */
+  }
+
+  const grouped = categories.map((c) => ({
+    ...c,
+    items: (services as any[]).filter((s) => s.category === c.slug),
+  }));
+
   return (
-    <>
-      <PageHero
-        badge="خدمات حقوقی"
-        title="راهکار حقوقی مناسب خود را پیدا کنید"
-        desc="موضوع مشکل خود را انتخاب کنید؛ از مشاوره و وکالت تخصصی تا تنظیم قرارداد، دادخواست و خدمات ثبتی — همه با وکلای پایه یک دادگستری."
-        breadcrumb={[{ label: "خانه", href: "/" }, { label: "خدمات حقوقی" }]}
-      />
+    <div className="min-h-screen bg-background pb-16">
+      <section className="border-b border-border bg-gradient-to-b from-primary-soft/60 to-background">
+        <Container className="py-12 sm:py-16">
+          <span className="inline-block rounded-full bg-accent-soft px-3 py-1 text-xs font-semibold text-accent">
+            خدمات پیگیری و انجام امور
+          </span>
+          <h1 className="mt-4 max-w-3xl text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
+            کارهای زمان‌بر حقوقی و اداری را به ما بسپارید
+          </h1>
+          <p className="mt-4 max-w-2xl text-lg leading-8 text-muted">
+            پیگیری پرونده، امور ثبتی، مالیاتی، اجرای احکام و درخواست‌های اداری — تیم عملیات شریفمند با نظارت حرفه‌ای آن‌ها را انجام می‌دهد.
+          </p>
+          <div className="mt-6 flex flex-wrap gap-3">
+            <Button href="/services#catalog" size="lg" icon="briefcase">
+              مشاهده خدمات
+            </Button>
+            <Button href="/ai-assistant" variant="outline" size="lg" icon="sparkles">
+              مشاوره با هوش مصنوعی
+            </Button>
+          </div>
+        </Container>
+      </section>
 
-      <Container className="py-12">
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {SERVICE_CATEGORIES.map((c, i) => (
-            <Reveal key={c.slug} delay={i * 60}>
-              <Card className="flex h-full flex-col">
-                <div className="flex items-center gap-3">
-                  <span className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-primary-soft text-primary">
-                    <Icon name={c.icon} className="h-6 w-6" />
-                  </span>
-                  <div>
-                    <h2 className="text-lg font-bold text-foreground">{c.name}</h2>
-                    <p className="text-xs text-muted">{c.tagline}</p>
-                  </div>
+      <div id="catalog" className="mt-12">
+        <Container>
+        <SectionHeading eyebrow="فهرست خدمات" title="خدمات عملیاتی شریفمند" desc="هر خدمت توسط کارشناس عملیات انجام می‌شود و در صورت نیاز با نظارت وکیل همراه است." />
+        <div className="mt-10 space-y-12">
+          {grouped.map((g) => (
+            <div key={g.slug}>
+              <div className="mb-5 flex items-center gap-3">
+                <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-surface-2 text-primary">
+                  <Icon name={(g.icon as IconKey) ?? "folder"} className="h-5 w-5" />
+                </span>
+                <div>
+                  <h2 className="text-xl font-bold text-foreground">{g.name}</h2>
+                  {g.description && <p className="text-sm text-muted">{g.description}</p>}
                 </div>
-                <p className="mt-4 flex-1 text-sm leading-7 text-foreground-soft">{c.desc}</p>
-                <div className="mt-4 flex flex-wrap gap-2">
-                  {c.sub.map((s) => (
-                    <Link
-                      key={s.name}
-                      href={s.href}
-                      className="rounded-full border border-border bg-surface-2 px-3 py-1 text-xs font-medium text-foreground-soft transition-colors hover:border-primary/40 hover:text-primary"
-                    >
-                      {s.name}
-                    </Link>
+              </div>
+              {g.items.length ? (
+                <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                  {g.items.map((s: any) => (
+                    <ServiceCard key={s.id} service={s} />
                   ))}
                 </div>
-                <Button href={`/services/${c.slug}`} variant="soft" icon="arrow" className="mt-5 w-full">
-                  مشاهده خدمت
-                </Button>
-              </Card>
-            </Reveal>
+              ) : (
+                <p className="text-sm text-muted">در حال حاضر خدمتی در این گروه منتشر نشده است.</p>
+              )}
+            </div>
           ))}
-        </div>
-      </Container>
-
-      {/* How it works */}
-      <Container className="py-10">
-        <Reveal>
-          <h2 className="text-center text-2xl font-bold text-foreground">از درخواست تا نتیجه، در ۶ گام</h2>
-        </Reveal>
-        <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
-          {SERVICE_STEPS.map((s, i) => (
-            <Reveal key={s.title} delay={i * 50}>
-              <Card hover={false} className="h-full">
-                <span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground">{i + 1}</span>
-                <h3 className="mt-3 text-sm font-bold text-foreground">{s.title}</h3>
-                <p className="mt-1 text-xs leading-5 text-muted">{s.desc}</p>
-              </Card>
-            </Reveal>
-          ))}
-        </div>
-      </Container>
-
-      <Container className="py-12">
-        <Reveal>
-          <div className="flex flex-col items-center justify-between gap-4 rounded-3xl border border-border bg-surface p-8 text-center card-shadow sm:flex-row sm:text-right">
+          {(services as any[]).filter((s) => !categories.some((c) => c.slug === s.category)).length > 0 && (
             <div>
-              <h2 className="text-xl font-bold text-foreground">مطمئن نیستید کدام خدمت مناسب شماست؟</h2>
-              <p className="mt-1 text-sm text-muted">پرونده‌تان را ثبت کنید تا کارشناسان بهترین مسیر را پیشنهاد دهند.</p>
+              <h2 className="mb-5 text-xl font-bold text-foreground">سایر خدمات</h2>
+              <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                {(services as any[]).filter((s) => !categories.some((c) => c.slug === s.category)).map((s: any) => (
+                  <ServiceCard key={s.id} service={s} />
+                ))}
+              </div>
             </div>
-            <div className="flex shrink-0 flex-wrap justify-center gap-3">
-              <Button href="/case/new" icon="folder">ثبت پرونده</Button>
-              <Button href="/ai-assistant" variant="outline" icon="sparkles">پرسیدن از دستیار</Button>
-            </div>
-          </div>
-        </Reveal>
+          )}
+        </div>
       </Container>
-    </>
+
+      <Container className="mt-16">
+        <Card className="bg-primary text-primary-foreground">
+          <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h3 className="text-lg font-bold">نمی‌دانید کدام خدمت مناسب شماست؟</h3>
+              <p className="mt-1 text-sm text-primary-foreground/80">
+                از دستیار هوشمند شریفمند بپرسید؛ بهترین مسیر و اقدام بعدی را به شما نشان می‌دهد.
+              </p>
+            </div>
+            <Button href="/ai-assistant" variant="accent" icon="sparkles">
+              پرسش از دستیار
+            </Button>
+          </div>
+        </Card>
+      </Container>
+      </div>
+    </div>
   );
 }

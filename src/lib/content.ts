@@ -97,7 +97,7 @@ export const POPULAR_SERVICES: { title: string; icon: IconKey; href: string }[] 
   { title: "وکیل ملکی", icon: "home", href: "/lawyers?sp=ملک" },
   { title: "وکیل کیفری", icon: "shield", href: "/lawyers?sp=کیفری" },
   { title: "تنظیم قرارداد", icon: "document", href: "/contracts" },
-  { title: "طلاق", icon: "balance", href: "/services/family" },
+  { title: "طلاق", icon: "balance", href: "/services/category/family" },
   { title: "چک و سفته", icon: "money", href: "/lawyers?sp=چک و اسناد" },
   { title: "ارث", icon: "scale", href: "/lawyers?sp=ارث" },
   { title: "ثبت شرکت", icon: "stamp", href: "/pricing" },
