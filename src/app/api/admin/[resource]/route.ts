@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { db } from "@/db";
-import { lawyers, contracts, qaQuestions, cases, consultations, tickets, articles, qaSubmissions, payments, lawyerAvailability } from "@/db/schema";
+import { lawyers, contracts, qaQuestions, cases, consultations, tickets, articles, qaSubmissions, payments, lawyerAvailability, managedServices, serviceCategories } from "@/db/schema";
 import { desc, eq } from "drizzle-orm";
 import { isAdmin } from "@/lib/admin-auth";
 
@@ -17,6 +17,8 @@ const TABLES: Record<string, { table: any; orderBy: any; searchCol?: any }> = {
   "qa-submissions": { table: qaSubmissions, orderBy: desc(qaSubmissions.createdAt), searchCol: qaSubmissions.question },
   payments: { table: payments, orderBy: desc(payments.createdAt), searchCol: payments.reference },
   availability: { table: lawyerAvailability, orderBy: null, searchCol: undefined },
+  "service-categories": { table: serviceCategories, orderBy: desc(serviceCategories.sortOrder), searchCol: serviceCategories.name },
+  "managed-services": { table: managedServices, orderBy: desc(managedServices.sortOrder), searchCol: managedServices.title },
 };
 
 export async function GET(req: Request, { params }: { params: Promise<{ resource: string }> }) {
@@ -29,6 +31,28 @@ export async function GET(req: Request, { params }: { params: Promise<{ resource
     return NextResponse.json({ ok: true, rows });
   } catch {
     return NextResponse.json({ ok: false, error: "db unavailable" }, { status: 500 });
+  }
+}
+
+export async function POST(req: Request, { params }: { params: Promise<{ resource: string }> }) {
+  const { resource } = await params;
+  if (!(await isAdmin())) return NextResponse.json({ ok: false, error: "unauthorized" }, { status: 401 });
+  const cfg = TABLES[resource];
+  if (!cfg) return NextResponse.json({ ok: false, error: "unknown resource" }, { status: 404 });
+  let body: { fields?: Record<string, unknown> };
+  try {
+    body = await req.json();
+  } catch {
+    return NextResponse.json({ ok: false, error: "bad body" }, { status: 400 });
+  }
+  const allowed = new Set(Object.keys(cfg.table));
+  const fields = Object.fromEntries(Object.entries(body.fields ?? {}).filter(([k]) => allowed.has(k)));
+  if (!Object.keys(fields).length) return NextResponse.json({ ok: false, error: "no fields" }, { status: 400 });
+  try {
+    const inserted = (await db.insert(cfg.table).values(fields as any).returning()) as any[];
+    return NextResponse.json({ ok: true, row: inserted[0] });
+  } catch {
+    return NextResponse.json({ ok: false, error: "create failed" }, { status: 500 });
   }
 }
 

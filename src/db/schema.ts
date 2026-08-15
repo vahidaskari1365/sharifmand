@@ -9,6 +9,8 @@ import {
   pgEnum,
   numeric,
   uniqueIndex,
+  index,
+  jsonb,
 } from "drizzle-orm/pg-core";
 
 export const caseStatus = pgEnum("case_status", [
@@ -41,6 +43,276 @@ export const consultationStatus = pgEnum("consultation_status", [
   "expired",
   "refunded",
 ]);
+
+/* ============================================================================
+ * Managed Services ("خدمات پیگیری و انجام امور") — domain enums
+ * ========================================================================== */
+
+export const svcClassification = pgEnum("svc_classification", [
+  "ADMINISTRATIVE",
+  "INFORMATIONAL",
+  "DOCUMENT_SERVICE",
+  "PROFESSIONAL_LEGAL",
+  "REPRESENTATION",
+  "REQUIRES_REVIEW",
+]);
+
+export const svcCategory = pgEnum("svc_category", [
+  "CASE_FOLLOW_UP",
+  "JUDICIAL_OPERATIONS",
+  "ENFORCEMENT",
+  "REGISTRATION",
+  "TAX",
+  "ADMINISTRATIVE",
+  "DOCUMENTS",
+  "ORGANIZATIONS",
+  "OTHER",
+]);
+
+export const svcPriceType = pgEnum("svc_price_type", [
+  "FIXED",
+  "FROM",
+  "QUOTE",
+  "REQUIRES_REVIEW",
+]);
+
+export const svcRequestStatus = pgEnum("svc_request_status", [
+  "DRAFT",
+  "SUBMITTED",
+  "REVIEWING",
+  "AWAITING_DOCUMENTS",
+  "QUOTED",
+  "AWAITING_PAYMENT",
+  "ASSIGNED",
+  "IN_PROGRESS",
+  "WAITING_EXTERNAL",
+  "COMPLETED",
+  "DELIVERED",
+  "CANCELLED",
+  "REJECTED",
+]);
+
+export const svcUrgency = pgEnum("svc_urgency", ["LOW", "NORMAL", "HIGH", "URGENT"]);
+
+export const svcContactPreference = pgEnum("svc_contact_preference", [
+  "PHONE",
+  "SMS",
+  "WHATSAPP",
+  "EMAIL",
+  "PORTAL",
+]);
+
+export const svcContractStatus = pgEnum("svc_contract_status", [
+  "NOT_REQUIRED",
+  "DRAFT",
+  "SENT",
+  "ACCEPTED",
+  "SIGNED",
+]);
+
+export const svcQuoteStatus = pgEnum("svc_quote_status", [
+  "DRAFT",
+  "SENT",
+  "VIEWED",
+  "ACCEPTED",
+  "REJECTED",
+  "EXPIRED",
+]);
+
+export const svcEventType = pgEnum("svc_event_type", [
+  "created",
+  "review_started",
+  "documents_received",
+  "assigned",
+  "progress",
+  "waiting_external",
+  "result_received",
+  "completed",
+  "status_changed",
+  "note",
+  "payment_required",
+  "quote_ready",
+  "contract_required",
+  "cancelled",
+  "rejected",
+  "other",
+]);
+
+/* ============================ Service Categories ============================ */
+export const serviceCategories = pgTable("service_categories", {
+  id: serial("id").primaryKey(),
+  slug: text("slug").notNull().unique(),
+  name: text("name").notNull(),
+  description: text("description").notNull().default(""),
+  icon: text("icon").notNull().default("folder"),
+  sortOrder: integer("sort_order").notNull().default(0),
+  active: boolean("active").notNull().default(true),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+/* ============================ Managed Services ============================ */
+export const managedServices = pgTable("managed_services", {
+  id: serial("id").primaryKey(),
+  title: text("title").notNull(),
+  slug: text("slug").notNull().unique(),
+  shortDescription: text("short_description").notNull().default(""),
+  description: text("description").notNull().default(""),
+  classification: svcClassification("classification").notNull().default("ADMINISTRATIVE"),
+  category: svcCategory("category").notNull().default("OTHER"),
+  icon: text("icon").notNull().default("folder"),
+  estimatedTime: text("estimated_time").notNull().default(""),
+  priceType: svcPriceType("price_type").notNull().default("QUOTE"),
+  basePrice: integer("base_price").notNull().default(0),
+  requiresCaseInfo: boolean("requires_case_info").notNull().default(false),
+  requiresDocuments: boolean("requires_documents").notNull().default(false),
+  requiresLawyer: boolean("requires_lawyer").notNull().default(false),
+  requiresSupervision: boolean("requires_supervision").notNull().default(false),
+  active: boolean("active").notNull().default(false),
+  featured: boolean("featured").notNull().default(false),
+  sortOrder: integer("sort_order").notNull().default(0),
+  /** Override intake form fields (JSON array of field descriptors). Null = derived from flags. */
+  formFields: jsonb("form_fields").$type<ServiceField[] | null>().default(null),
+  /** Required document labels (JSON array of strings). */
+  requiredDocs: jsonb("required_docs").$type<string[] | null>().default(null),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (t) => ({
+  categoryIdx: index("managed_services_category_idx").on(t.category),
+  activeFeaturedIdx: index("managed_services_active_featured_idx").on(t.active, t.featured),
+}));
+
+export type ServiceField = {
+  name: string;
+  label: string;
+  type: "text" | "textarea" | "select" | "tel" | "number" | "date" | "toggle";
+  required?: boolean;
+  options?: string[];
+  placeholder?: string;
+  hint?: string;
+};
+
+/* ============================ Service Requests ============================ */
+export const serviceRequests = pgTable("service_requests", {
+  id: serial("id").primaryKey(),
+  requestNumber: text("request_number").notNull().unique(),
+  userId: integer("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  serviceId: integer("service_id")
+    .notNull()
+    .references(() => managedServices.id, { onDelete: "restrict" }),
+  title: text("title").notNull(),
+  description: text("description").notNull().default(""),
+  /** Answers from the dynamic intake form (JSON). */
+  answers: jsonb("answers").$type<Record<string, string> | null>().default(null),
+  urgency: svcUrgency("urgency").notNull().default("NORMAL"),
+  city: text("city"),
+  organization: text("organization"),
+  referenceNumber: text("reference_number"),
+  caseNumber: text("case_number"),
+  requestedDeadline: text("requested_deadline"),
+  contactPreference: svcContactPreference("contact_preference").notNull().default("PORTAL"),
+  status: svcRequestStatus("status").notNull().default("DRAFT"),
+  assignedStaffId: integer("assigned_staff_id").references(() => users.id, { onDelete: "set null" }),
+  supervisingLawyerId: integer("supervising_lawyer_id").references(() => users.id, { onDelete: "set null" }),
+  price: integer("price"),
+  paymentStatus: text("payment_status").notNull().default("unpaid"),
+  contractStatus: svcContractStatus("contract_status").notNull().default("NOT_REQUIRED"),
+  finalReport: text("final_report"),
+  resultFileLabel: text("result_file_label"),
+  startedAt: timestamp("started_at"),
+  completedAt: timestamp("completed_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (t) => ({
+  userIdx: index("service_requests_user_idx").on(t.userId),
+  statusIdx: index("service_requests_status_idx").on(t.status),
+  staffIdx: index("service_requests_staff_idx").on(t.assignedStaffId),
+  supervisorIdx: index("service_requests_supervisor_idx").on(t.supervisingLawyerId),
+}));
+
+/* ============================ Request Timeline ============================ */
+export const serviceRequestEvents = pgTable("service_request_events", {
+  id: serial("id").primaryKey(),
+  requestId: integer("request_id")
+    .notNull()
+    .references(() => serviceRequests.id, { onDelete: "cascade" }),
+  type: svcEventType("type").notNull().default("note"),
+  title: text("title").notNull(),
+  description: text("description").notNull().default(""),
+  createdBy: integer("created_by").references(() => users.id, { onDelete: "set null" }),
+  createdByName: text("created_by_name"),
+  visibleToUser: boolean("visible_to_user").notNull().default(true),
+  metadata: jsonb("metadata"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (t) => ({
+  requestIdx: index("service_request_events_request_idx").on(t.requestId, t.createdAt),
+}));
+
+/* ============================ Request Documents ============================ */
+export const serviceRequestDocs = pgTable("service_request_docs", {
+  id: serial("id").primaryKey(),
+  requestId: integer("request_id")
+    .notNull()
+    .references(() => serviceRequests.id, { onDelete: "cascade" }),
+  uploadedBy: integer("uploaded_by").references(() => users.id, { onDelete: "set null" }),
+  uploaderRole: text("uploader_role").notNull().default("client"),
+  name: text("name").notNull(),
+  docType: text("doc_type").notNull().default("سند"),
+  size: integer("size").notNull().default(0),
+  /** Placeholder storage key; real blob storage is wired in when available. */
+  storageKey: text("storage_key").notNull().default(""),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (t) => ({
+  requestIdx: index("service_request_docs_request_idx").on(t.requestId),
+}));
+
+/* ============================ Quotes ============================ */
+export const serviceQuotes = pgTable("service_quotes", {
+  id: serial("id").primaryKey(),
+  requestId: integer("request_id")
+    .notNull()
+    .references(() => serviceRequests.id, { onDelete: "cascade" }),
+  subtotal: integer("subtotal").notNull().default(0),
+  discount: integer("discount").notNull().default(0),
+  total: integer("total").notNull().default(0),
+  currency: text("currency").notNull().default("IRR"),
+  expiresAt: timestamp("expires_at"),
+  status: svcQuoteStatus("status").notNull().default("DRAFT"),
+  createdBy: integer("created_by").references(() => users.id, { onDelete: "set null" }),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (t) => ({
+  requestIdx: index("service_quotes_request_idx").on(t.requestId),
+}));
+
+/* ============================ Notifications ============================ */
+export const serviceNotifications = pgTable("service_notifications", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  requestId: integer("request_id").references(() => serviceRequests.id, { onDelete: "cascade" }),
+  type: text("type").notNull(),
+  title: text("title").notNull(),
+  body: text("body").notNull().default(""),
+  read: boolean("read").notNull().default(false),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (t) => ({
+  userReadIdx: index("service_notifications_user_idx").on(t.userId, t.read),
+}));
+
+/* ============================ Audit Log ============================ */
+export const serviceAuditLogs = pgTable("service_audit_logs", {
+  id: serial("id").primaryKey(),
+  requestId: integer("request_id").references(() => serviceRequests.id, { onDelete: "cascade" }),
+  action: text("action").notNull(),
+  actorRole: text("actor_role"),
+  actorId: integer("actor_id"),
+  metadata: jsonb("metadata"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (t) => ({
+  requestIdx: index("service_audit_logs_request_idx").on(t.requestId),
+}));
 
 /* ------------------------------ Lawyers ------------------------------ */
 export const lawyers = pgTable("lawyers", {
@@ -190,6 +462,16 @@ export type QaQuestion = typeof qaQuestions.$inferSelect;
 export type Case = typeof cases.$inferSelect;
 export type Consultation = typeof consultations.$inferSelect;
 export type Review = typeof reviews.$inferSelect;
+
+/* ------------------------------ Managed Services types ------------------------------ */
+export type ServiceCategory = typeof serviceCategories.$inferSelect;
+export type ManagedService = typeof managedServices.$inferSelect;
+export type ServiceRequest = typeof serviceRequests.$inferSelect;
+export type ServiceRequestEvent = typeof serviceRequestEvents.$inferSelect;
+export type ServiceRequestDoc = typeof serviceRequestDocs.$inferSelect;
+export type ServiceQuote = typeof serviceQuotes.$inferSelect;
+export type ServiceNotification = typeof serviceNotifications.$inferSelect;
+export type ServiceAuditLog = typeof serviceAuditLogs.$inferSelect;
 
 /* ------------------------------ Page views (tracking) ------------------------------ */
 export const pageViews = pgTable("page_views", {

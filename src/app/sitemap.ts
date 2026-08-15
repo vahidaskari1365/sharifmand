@@ -44,7 +44,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...LAWS.map((l) => `${BASE}/laws/${l.slug}`),
     ...JUDGMENTS.map((j) => `${BASE}/judgments/${j.slug}`),
     ...LEGAL_FORMS.map((f) => `${BASE}/legal-forms/${f.slug}`),
-    `${BASE}/services/family/divorce`,
+    `${BASE}/services/category/family`,
   ].map((url) => ({ url, lastModified: new Date(), changeFrequency: "monthly" as const, priority: 0.6 }));
 
   return [

@@ -6,15 +6,26 @@ import { Container, SectionHeading, Button, Card } from "@/components/ui";
 import { Icon } from "@/components/icons";
 import { LawyerCard } from "@/components/lawyer-card";
 import { HomeHero } from "@/components/home-hero";
+import AIFunnel from "@/components/ai-funnel";
 import { QuickStart } from "@/components/quick-start";
 import { Reveal } from "@/components/reveal";
 import { Counter } from "@/components/counter";
-import { SERVICES, CONSULTATION_TYPES, faNum, faPrice } from "@/lib/data";
+import { CONSULTATION_TYPES, faNum, faPrice } from "@/lib/data";
 import type { IconKey } from "@/lib/data";
 import { SPECIAL_SERVICES } from "@/lib/content";
 import { getPlatformStats } from "@/lib/stats";
 
 export const dynamic = "force-dynamic";
+
+// Homepage intent cards (section #2): "هر کمکی نیاز دارید، اینجاست"
+const INTENT_CARDS: { title: string; desc: string; icon: IconKey; href: string; accent?: boolean }[] = [
+  { title: "وکیل", desc: "وکیل متخصص را بیابید و با خیال آسوده اعتماد کنید.", icon: "search", href: "/lawyers", accent: true },
+  { title: "مشاوره", desc: "مشاوره متنی، صوتی یا تصویری با وکیل متخصص.", icon: "chat", href: "/consultation" },
+  { title: "پیگیری و انجام امور", desc: "پیگیری پرونده، امور اداری و ثبتی را به ما بسپارید.", icon: "briefcase", href: "/services", accent: true },
+  { title: "قرارداد", desc: "تنظیم و بررسی قراردادهای حقوقی.", icon: "document", href: "/contracts" },
+  { title: "پرونده", desc: "ثبت و ارزیابی اولیه پرونده حقوقی خود.", icon: "folder", href: "/case/new" },
+  { title: "کسب‌وکار", desc: "خدمات حقوقی شرکت‌ها و کسب‌وکارها.", icon: "building", href: "/business" },
+];
 
 const TRUST: { title: string; desc: string; icon: IconKey }[] = [
   { title: "احراز هویت و تأیید پروانه", desc: "هویت و پروانه همه وکلا توسط کارشناسان شریفمند راستی‌آزمایی می‌شود.", icon: "badge" },
@@ -44,40 +55,18 @@ export default async function HomePage() {
     <div className="page-wash">
       <HomeHero />
 
-      {/* Stats — real, DB-derived counters only */}
-      {realStats.length > 0 && (
-        <Container>
-          <Reveal>
-            <div className="grid grid-cols-2 gap-4 rounded-3xl border border-border bg-surface/80 p-6 card-shadow backdrop-blur sm:grid-cols-4 sm:p-8">
-              {realStats.map((s) => (
-                <div key={s.label} className="flex flex-col items-center gap-1.5 text-center">
-                  <span className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-primary-soft text-primary">
-                    <Icon name={s.icon} className="h-5 w-5" />
-                  </span>
-                  <Counter
-                    to={s.to}
-                    className="text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl"
-                  />
-                  <span className="text-xs text-muted sm:text-sm">{s.label}</span>
-                </div>
-              ))}
-            </div>
-          </Reveal>
-        </Container>
-      )}
-
-      {/* Services grid */}
-      <section className="mt-24">
+      {/* #2 — Intent cards: "هر کمکی نیاز دارید، اینجاست" */}
+      <section className="mt-20">
         <Container>
           <Reveal>
             <SectionHeading
-              eyebrow="خدمات حقوقی"
-              title="هر کمکی که نیاز دارید، اینجاست"
-              desc="از وکیل‌یابی و مشاوره تا تنظیم اسناد و مدیریت پرونده؛ خدمات شریفمند را انتخاب کنید."
+              eyebrow="دریافت کمک"
+              title="هر کمکی نیاز دارید، اینجاست"
+              desc="مسیر درست را انتخاب کنید؛ شریفمند شما را به بهترین اقدام بعدی هدایت می‌کند."
             />
           </Reveal>
           <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {SERVICES.map((s, i) => (
+            {INTENT_CARDS.map((s, i) => (
               <Reveal key={s.title} delay={i * 40}>
                 <Link
                   href={s.href}
@@ -105,6 +94,37 @@ export default async function HomePage() {
           </div>
         </Container>
       </section>
+
+      {/* #3 — AI funnel (never competes with a lawyer; routes to /ai-assistant?q=) */}
+      <section className="mt-24">
+        <Container>
+          <Reveal>
+            <AIFunnel />
+          </Reveal>
+        </Container>
+      </section>
+
+      {/* Stats — real, DB-derived counters only (part of "rest") */}
+      {realStats.length > 0 && (
+        <Container>
+          <Reveal>
+            <div className="grid grid-cols-2 gap-4 rounded-3xl border border-border bg-surface/80 p-6 card-shadow backdrop-blur sm:grid-cols-4 sm:p-8">
+              {realStats.map((s) => (
+                <div key={s.label} className="flex flex-col items-center gap-1.5 text-center">
+                  <span className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-primary-soft text-primary">
+                    <Icon name={s.icon} className="h-5 w-5" />
+                  </span>
+                  <Counter
+                    to={s.to}
+                    className="text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl"
+                  />
+                  <span className="text-xs text-muted sm:text-sm">{s.label}</span>
+                </div>
+              ))}
+            </div>
+          </Reveal>
+        </Container>
+      )}
 
       {/* Special services */}
       <section className="mt-24">
@@ -207,51 +227,6 @@ export default async function HomePage() {
               </Reveal>
             ))}
           </div>
-        </Container>
-      </section>
-
-      {/* AI Assistant CTA */}
-      <section className="mt-24">
-        <Container>
-          <Reveal>
-            <div className="relative overflow-hidden rounded-3xl border border-border bg-gradient-to-br from-primary to-primary-hover p-8 text-primary-foreground sm:p-12">
-              <div className="pointer-events-none absolute -left-20 -top-20 h-64 w-64 rounded-full bg-accent/25 blur-3xl" />
-              <div className="pointer-events-none absolute -bottom-24 -right-10 h-72 w-72 rounded-full bg-white/10 blur-3xl" />
-              <div className="relative grid items-center gap-8 lg:grid-cols-[1.5fr_1fr]">
-                <div>
-                  <span className="inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-xs font-semibold backdrop-blur">
-                    <Icon name="sparkles" className="h-4 w-4" /> هوش مصنوعی حقوقی
-                  </span>
-                  <h2 className="mt-4 text-2xl font-bold leading-snug sm:text-3xl">
-                    دستیار حقوقی هوشمند، ۲۴ ساعته کنار شماست
-                  </h2>
-                  <p className="mt-3 max-w-xl text-sm leading-7 text-white/85">
-                    موضوع مشکل خود را بنویسید؛ دستیار شریفمند موضوع را تشخیص می‌دهد، مراحل، مدارک و
-                    ریسک‌ها را توضیح می‌دهد و شما را به وکیل متخصص وصل می‌کند.
-                  </p>
-                  <div className="mt-6 flex flex-wrap gap-2">
-                    <Button href="/ai-assistant" variant="accent" icon="sparkles">شروع گفتگو با دستیار</Button>
-                    <Button href="/ai-assistant?tab=contract" className="bg-white/15 text-white hover:bg-white/25">تحلیل قرارداد</Button>
-                  </div>
-                </div>
-                <div className="hidden rounded-2xl bg-white/10 p-4 backdrop-blur lg:block">
-                  <div className="flex items-center gap-2 border-b border-white/15 pb-3">
-                    <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-accent text-accent-foreground">
-                      <Icon name="sparkles" className="h-4 w-4" />
-                    </span>
-                    <span className="text-sm font-semibold">دستیار شریفمند</span>
-                  </div>
-                  <div className="mt-3 space-y-2 text-xs">
-                    <p className="rounded-xl rounded-tr-sm bg-white/15 px-3 py-2">مستأجر من سه ماه اجاره نداده، چه کنم؟</p>
-                    <p className="rounded-xl rounded-tl-sm bg-white/25 px-3 py-2 leading-6">
-                      موضوع ملک و اجاره شناسایی شد. طبق ماده ۴۹۴ قانون مدنی و ماده ۲ قانون روابط موجر و مستأجر
-                      ۱۳۷۶، مدارک لازم: قرارداد اجاره و گواهی پرداخت. مراحل: اظهارنامه، دادخواست تخلیه، اجرای حکم…
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </Reveal>
         </Container>
       </section>
 
