@@ -9,6 +9,21 @@ function secret(): string {
   if (!value || value.length < 32) throw new Error("AUTH_SECRET must be configured with at least 32 characters");
   return value;
 }
+
+/**
+ * Returns the configured session secret, or null when it is missing/too short.
+ * Verification paths must use this: a misconfigured secret must degrade to
+ * "signed out" instead of crashing the page with a 500.
+ */
+function secretOrNull(): string | null {
+  const value = process.env.AUTH_SECRET;
+  return value && value.length >= 32 ? value : null;
+}
+
+/** True when user sessions can be issued/verified (AUTH_SECRET >= 32 chars). */
+export function isUserAuthConfigured(): boolean {
+  return secretOrNull() !== null;
+}
 const COOKIE = "sharifmand_user";
 const TTL_MS = 1000 * 60 * 60 * 24 * 30; // 30 days
 
@@ -45,11 +60,13 @@ export function signUserSession(userId: number, role: string): string {
 
 export function verifyUserSession(token: string | undefined): { uid: number; role: string } | null {
   if (!token) return null;
-  const [payload, sig] = token.split(".");
-  if (!payload || !sig) return null;
-  const expected = createHmac("sha256", secret()).update(payload).digest("base64url");
-  if (!safeEq(sig, expected)) return null;
   try {
+    const sec = secretOrNull();
+    if (!sec) return null; // secret misconfigured → treat as signed out, never 500
+    const [payload, sig] = token.split(".");
+    if (!payload || !sig) return null;
+    const expected = createHmac("sha256", sec).update(payload).digest("base64url");
+    if (!safeEq(sig, expected)) return null;
     const data = JSON.parse(Buffer.from(payload, "base64url").toString("utf8"));
     if (typeof data.exp !== "number" || data.exp < Date.now()) return null;
     return { uid: Number(data.uid), role: String(data.role ?? "client") };
@@ -59,10 +76,10 @@ export function verifyUserSession(token: string | undefined): { uid: number; rol
 }
 
 export async function getCurrentUser() {
-  const store = await cookies();
-  const session = verifyUserSession(store.get(COOKIE)?.value);
-  if (!session) return null;
   try {
+    const store = await cookies();
+    const session = verifyUserSession(store.get(COOKIE)?.value);
+    if (!session) return null;
     const [user] = await db.select().from(users).where(eq(users.id, session.uid));
     return user ?? null;
   } catch {
