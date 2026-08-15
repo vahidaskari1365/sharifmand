@@ -7,6 +7,7 @@ import { noFlashScript } from "@/components/no-flash";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { Tracker } from "@/components/tracker";
+import { SITE_NAME, SITE_NAME_EN, SITE_TITLE, SITE_DESCRIPTION } from "@/lib/brand";
 
 /* فونت وزیرمتن به‌صورت local میزبانی می‌شود تا build به شبکه خارجی وابسته نباشد */
 const vazirmatn = localFont({
@@ -21,23 +22,23 @@ const vazirmatn = localFont({
 export const metadata: Metadata = {
   metadataBase: new URL("https://sharifmand.ir"),
   title: {
-    default: "شریفمند | پلتفرم هوشمند خدمات حقوقی، وکیل‌یابی و مشاوره آنلاین",
-    template: "%s | شریفمند",
+    default: SITE_TITLE,
+    template: `%s | ${SITE_NAME}`,
   },
-  description:
-    "شریفمند پلتفرم کامل خدمات حقوقی است: جستجوی وکیل متخصص، مشاوره متنی و صوتی و تصویری، ثبت و مدیریت پرونده، تنظیم قرارداد، دادخواست و شکواییه، بانک قوانین و دستیار حقوقی هوش مصنوعی.",
+  description: SITE_DESCRIPTION,
   keywords: [
     "وکیل", "مشاوره حقوقی آنلاین", "وکیل خانواده", "وکیل ملکی", "وکیل کیفری",
-    "تنظیم قرارداد", "چک برگشتی", "طلاق", "ثبت شرکت", "مشاوره وکیل",
+    "تنظیم قرارداد", "چک برگشتی", "طلاق", "ثبت شرکت", "مشاوره وکیل", "دادبان",
   ],
+  icons: { icon: "/logo.png", apple: "/logo.png" },
   alternates: { canonical: "/" },
   openGraph: {
     type: "website",
     locale: "fa_IR",
-    siteName: "شریفمند",
-    title: "شریفمند | پلتفرم هوشمند خدمات حقوقی",
+    siteName: SITE_NAME,
+    title: `${SITE_NAME} | پلتفرم هوشمند خدمات حقوقی`,
     description:
-      "جستجوی وکیل متخصص، مشاوره آنلاین، ثبت پرونده، تنظیم قرارداد و دستیار حقوقی هوش مصنوعی — همه در شریفمند.",
+      `جستجوی وکیل متخصص، مشاوره آنلاین، ثبت پرونده، تنظیم قرارداد و دستیار حقوقی هوش مصنوعی — همه در ${SITE_NAME}.`,
   },
   robots: { index: true, follow: true },
 };
@@ -52,8 +53,8 @@ export const viewport: Viewport = {
 const orgJsonLd = {
   "@context": "https://schema.org",
   "@type": "LegalService",
-  name: "شریفمند",
-  alternateName: "Sharifmand Legal Platform",
+  name: SITE_NAME,
+  alternateName: `${SITE_NAME_EN} Legal Platform`,
   description:
     "پلتفرم هوشمند خدمات حقوقی؛ وکیل‌یابی، مشاوره آنلاین، ثبت پرونده، تنظیم اسناد حقوقی و دستیار حقوقی هوش مصنوعی.",
   url: "https://sharifmand.ir",

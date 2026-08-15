@@ -1,7 +1,9 @@
 import type { ReactNode } from "react";
+import Image from "next/image";
 import { Icon } from "./icons";
 import type { IconKey } from "@/lib/data";
 import { faNum } from "@/lib/data";
+import { SITE_NAME, SITE_TAGLINE } from "@/lib/brand";
 
 export function Container({
   children,
@@ -131,14 +133,20 @@ export function Avatar({
 export function Logo({ withText = true }: { withText?: boolean }) {
   return (
     <span className="inline-flex items-center gap-2.5">
-      <span className="relative inline-flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-primary-hover text-primary-foreground shadow-md">
-        <Icon name="balance" className="h-6 w-6" />
-        <span className="absolute -bottom-1 -left-1 h-3 w-3 rounded-full bg-accent ring-2 ring-background" />
+      <span className="relative inline-flex h-10 w-10 overflow-hidden rounded-xl shadow-md ring-1 ring-black/5">
+        <Image
+          src="/logo.png"
+          alt={SITE_NAME}
+          width={40}
+          height={40}
+          className="h-10 w-10 object-cover"
+          priority
+        />
       </span>
       {withText && (
         <span className="flex flex-col leading-none">
-          <span className="text-lg font-extrabold tracking-tight text-foreground">شریفمند</span>
-          <span className="text-[10px] font-medium text-muted">پلتفرم خدمات حقوقی</span>
+          <span className="text-lg font-extrabold tracking-tight text-foreground">{SITE_NAME}</span>
+          <span className="text-[10px] font-medium text-muted">{SITE_TAGLINE}</span>
         </span>
       )}
     </span>

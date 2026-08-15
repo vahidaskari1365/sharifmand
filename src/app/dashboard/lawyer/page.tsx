@@ -11,7 +11,7 @@ import { getCurrentUser } from "@/lib/user-auth";
 
 export const metadata: Metadata = {
   title: "پنل وکیل — داشبورد مدیریت",
-  description: "پرونده‌ها، درخواست‌های مشاوره و وضعیت واقعی عملیات پلتفرم برای وکلای شریفمند.",
+  description: "پرونده‌ها، درخواست‌های مشاوره و وضعیت واقعی عملیات پلتفرم برای وکلای دادبان.",
 };
 export const dynamic = "force-dynamic";
 

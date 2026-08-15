@@ -21,7 +21,12 @@ export default async function ContractsPage({
   searchParams: Promise<{ cat?: string; q?: string }>;
 }) {
   const { cat, q } = await searchParams;
-  const all = await db.select().from(contracts).orderBy(contracts.title);
+  let all: typeof contracts.$inferSelect[] = [];
+  try {
+    all = await db.select().from(contracts).orderBy(contracts.title);
+  } catch (err) {
+    console.error("[dadban] contracts list query failed:", err);
+  }
 
   let list = all;
   if (cat) list = list.filter((c) => c.category === cat);

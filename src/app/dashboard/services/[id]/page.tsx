@@ -1,10 +1,8 @@
-import type { Metadata } from "next";
 import { redirect, notFound } from "next/navigation";
 import { db } from "@/db";
-import { serviceRequests, serviceRequestEvents, serviceRequestDocs, serviceQuotes, managedServices } from "@/db/schema";
+import { serviceRequestEvents, serviceRequestDocs, serviceQuotes, managedServices } from "@/db/schema";
 import { eq, desc } from "drizzle-orm";
 import { DashboardShell } from "@/components/dashboard-shell";
-import { Card } from "@/components/ui";
 import Link from "next/link";
 import { Icon } from "@/components/icons";
 import type { IconKey } from "@/lib/data";
@@ -14,19 +12,28 @@ import UserRequestDetail from "@/components/user-request-detail";
 
 export const dynamic = "force-dynamic";
 
-export default async function MyServiceRequest({ params }: { params: { id: string } }) {
+export default async function MyServiceRequest({ params }: { params: Promise<{ id: string }> }) {
   const user = await getCurrentUser();
   if (!user) redirect("/login");
-  const id = Number(params.id);
+  const { id: idParam } = await params;
+  const id = Number(idParam);
   const req = await resolveRequestFor(user, id);
   if (!req) notFound();
 
-  const [[svc], events, quotes, docs] = await Promise.all([
-    db.select({ title: managedServices.title, slug: managedServices.slug, icon: managedServices.icon, requiresLawyer: managedServices.requiresLawyer }).from(managedServices).where(eq(managedServices.id, req.serviceId)).limit(1),
-    db.select().from(serviceRequestEvents).where(eq(serviceRequestEvents.requestId, id)).orderBy(desc(serviceRequestEvents.createdAt)),
-    db.select().from(serviceQuotes).where(eq(serviceQuotes.requestId, id)).orderBy(desc(serviceQuotes.createdAt)).limit(3),
-    db.select().from(serviceRequestDocs).where(eq(serviceRequestDocs.requestId, id)).orderBy(desc(serviceRequestDocs.createdAt)),
-  ]);
+  let svc: { title: string; slug: string; icon: string; requiresLawyer: boolean } | undefined;
+  let events: typeof serviceRequestEvents.$inferSelect[] = [];
+  let quotes: typeof serviceQuotes.$inferSelect[] = [];
+  let docs: typeof serviceRequestDocs.$inferSelect[] = [];
+  try {
+    [[svc], events, quotes, docs] = await Promise.all([
+      db.select({ title: managedServices.title, slug: managedServices.slug, icon: managedServices.icon, requiresLawyer: managedServices.requiresLawyer }).from(managedServices).where(eq(managedServices.id, req.serviceId)).limit(1),
+      db.select().from(serviceRequestEvents).where(eq(serviceRequestEvents.requestId, id)).orderBy(desc(serviceRequestEvents.createdAt)),
+      db.select().from(serviceQuotes).where(eq(serviceQuotes.requestId, id)).orderBy(desc(serviceQuotes.createdAt)).limit(3),
+      db.select().from(serviceRequestDocs).where(eq(serviceRequestDocs.requestId, id)).orderBy(desc(serviceRequestDocs.createdAt)),
+    ]);
+  } catch (err) {
+    console.error("[dadban] service request detail query failed:", err);
+  }
 
   const visibleEvents = events.filter((e) => e.visibleToUser);
 

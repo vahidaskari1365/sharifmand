@@ -68,7 +68,7 @@ export default async function AdminPage() {
     <>
       <PageHero
         badge="Admin · پنل مدیریت"
-        title="داشبورد مدیریت شریفمند"
+        title="داشبورد مدیریت دادبان"
         desc="مدیریت محتوا، داده‌های سایت و آمار بازدید — با ورود امن مدیر."
         breadcrumb={[{ label: "خانه", href: "/" }, { label: "پنل مدیریت" }]}
       >

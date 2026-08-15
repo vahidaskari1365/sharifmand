@@ -28,20 +28,34 @@ const INTENT_CARDS: { title: string; desc: string; icon: IconKey; href: string; 
 ];
 
 const TRUST: { title: string; desc: string; icon: IconKey }[] = [
-  { title: "احراز هویت و تأیید پروانه", desc: "هویت و پروانه همه وکلا توسط کارشناسان شریفمند راستی‌آزمایی می‌شود.", icon: "badge" },
+  { title: "احراز هویت و تأیید پروانه", desc: "هویت و پروانه همه وکلا توسط کارشناسان دادبان راستی‌آزمایی می‌شود.", icon: "badge" },
   { title: "محرمانگی اطلاعات", desc: "اطلاعات شما محرمانه نگه‌داری می‌شود و طبق سیاست حریم خصوصی در اختیار غیر قرار نمی‌گیرد.", icon: "lock" },
   { title: "بازگشت وجه طبق سیاست شفاف", desc: "اگر خدمتی ارائه نشود، وجه شما طبق سیاست بازگشت وجه عودت داده می‌شود.", icon: "shield" },
   { title: "حل اختلاف شفاف", desc: "تیم پشتیبانی در صورت بروز اختلاف، رسیدگی بی‌طرفانه انجام می‌دهد.", icon: "balance" },
 ];
 
 export default async function HomePage() {
-  const [featured, recentArticles, popularQa, popularContracts, stats] = await Promise.all([
-    db.select().from(lawyers).where(eq(lawyers.featured, true)).limit(4),
-    db.select().from(articles).orderBy(desc(articles.publishedAt)).limit(3),
-    db.select().from(qaQuestions).orderBy(desc(qaQuestions.helpful)).limit(3),
-    db.select().from(contracts).where(eq(contracts.popular, true)).limit(3),
-    getPlatformStats(),
-  ]);
+  let featured: typeof lawyers.$inferSelect[] = [];
+  let recentArticles: typeof articles.$inferSelect[] = [];
+  let popularQa: typeof qaQuestions.$inferSelect[] = [];
+  let popularContracts: typeof contracts.$inferSelect[] = [];
+  let stats: Awaited<ReturnType<typeof getPlatformStats>> = {
+    verifiedLawyers: null,
+    registeredCases: null,
+    answeredQuestions: null,
+    publishedArticles: null,
+  };
+  try {
+    [featured, recentArticles, popularQa, popularContracts, stats] = await Promise.all([
+      db.select().from(lawyers).where(eq(lawyers.featured, true)).limit(4),
+      db.select().from(articles).orderBy(desc(articles.publishedAt)).limit(3),
+      db.select().from(qaQuestions).orderBy(desc(qaQuestions.helpful)).limit(3),
+      db.select().from(contracts).where(eq(contracts.popular, true)).limit(3),
+      getPlatformStats(),
+    ]);
+  } catch (err) {
+    console.error("[dadban] homepage query failed:", err);
+  }
 
   // Real numbers only — nothing fabricated; a metric is hidden when unknown.
   const realStats: { to: number; label: string; icon: IconKey }[] = [
@@ -62,7 +76,7 @@ export default async function HomePage() {
             <SectionHeading
               eyebrow="دریافت کمک"
               title="هر کمکی نیاز دارید، اینجاست"
-              desc="مسیر درست را انتخاب کنید؛ شریفمند شما را به بهترین اقدام بعدی هدایت می‌کند."
+              desc="مسیر درست را انتخاب کنید؛ دادبان شما را به بهترین اقدام بعدی هدایت می‌کند."
             />
           </Reveal>
           <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -234,7 +248,7 @@ export default async function HomePage() {
       <section className="mt-24">
         <Container>
           <Reveal>
-            <SectionHeading eyebrow="چرا شریفمند؟" title="اعتماد، اصل ماجراست" />
+            <SectionHeading eyebrow="چرا دادبان؟" title="اعتماد، اصل ماجراست" />
           </Reveal>
           <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {TRUST.map((t, i) => (
@@ -324,7 +338,7 @@ export default async function HomePage() {
               <div className="relative">
                 <h2 className="text-2xl font-bold text-foreground sm:text-3xl">آماده‌اید مشکل حقوقی‌تان را حل کنید؟</h2>
                 <p className="mx-auto mt-3 max-w-xl text-muted">
-                  همین حالا وکیل متخصص خود را پیدا کنید یا پرونده‌تان را ثبت نمایید. تیم شریفمند کنار شماست.
+                  همین حالا وکیل متخصص خود را پیدا کنید یا پرونده‌تان را ثبت نمایید. تیم دادبان کنار شماست.
                 </p>
                 <div className="mt-6 flex flex-wrap justify-center gap-3">
                   <Button href="/lawyers" size="lg" icon="search">پیدا کردن وکیل</Button>

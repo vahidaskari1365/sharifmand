@@ -16,8 +16,13 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const rows = await db.select().from(articles).where(eq(articles.slug, slug)).limit(1);
-  const a = rows[0];
+  let a: typeof articles.$inferSelect | undefined;
+  try {
+    const rows = await db.select().from(articles).where(eq(articles.slug, slug)).limit(1);
+    a = rows[0];
+  } catch (err) {
+    console.error("[dadban] article metadata query failed:", err);
+  }
   if (!a) return { title: "مقاله یافت نشد" };
   return {
     title: a.title,
@@ -34,16 +39,26 @@ export default async function ArticlePage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const rows = await db.select().from(articles).where(eq(articles.slug, slug)).limit(1);
-  const a = rows[0];
+  let a: typeof articles.$inferSelect | undefined;
+  try {
+    const rows = await db.select().from(articles).where(eq(articles.slug, slug)).limit(1);
+    a = rows[0];
+  } catch (err) {
+    console.error("[dadban] article page query failed:", err);
+  }
   if (!a) notFound();
 
   const paragraphs = a.content.split("\n\n").filter(Boolean);
-  const related = await db
-    .select()
-    .from(articles)
-    .where(eq(articles.category, a.category))
-    .then((r) => r.filter((x) => x.slug !== a.slug).slice(0, 3));
+  let related: typeof articles.$inferSelect[] = [];
+  try {
+    related = await db
+      .select()
+      .from(articles)
+      .where(eq(articles.category, a.category))
+      .then((r) => r.filter((x) => x.slug !== a.slug).slice(0, 3));
+  } catch (err) {
+    console.error("[dadban] related articles query failed:", err);
+  }
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -52,7 +67,7 @@ export default async function ArticlePage({
     description: a.excerpt,
     articleSection: a.category,
     author: { "@type": "Person", name: a.author, jobTitle: a.authorRole },
-    publisher: { "@type": "Organization", name: "شریفمند" },
+    publisher: { "@type": "Organization", name: "دادبان" },
     datePublished: a.publishedAt,
   };
 

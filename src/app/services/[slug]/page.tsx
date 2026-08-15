@@ -12,13 +12,15 @@ import RequestForm from "@/components/request-form";
 
 export const dynamic = "force-dynamic";
 
-export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
-  const svc = await getServiceBySlug(params.slug);
-  return { title: svc ? `${svc.title} — شریفمند` : "خدمت یافت نشد", description: svc?.shortDescription };
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params;
+  const svc = await getServiceBySlug(slug);
+  return { title: svc ? `${svc.title} — دادبان` : "خدمت یافت نشد", description: svc?.shortDescription };
 }
 
-export default async function ServiceDetail({ params }: { params: { slug: string } }) {
-  const [svc] = await Promise.all([getServiceBySlug(params.slug)]);
+export default async function ServiceDetail({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  const svc = await getServiceBySlug(slug);
   if (!svc || !svc.active) notFound();
 
   const fields = deriveIntakeFields(svc);
@@ -69,7 +71,7 @@ export default async function ServiceDetail({ params }: { params: { slug: string
                 {svc.requiresLawyer ? (
                   <li>• در صورت نیاز، ارجاع به وکیل واجد صلاحیت و نظارت حرفه‌ای</li>
                 ) : (
-                  <li>• انجام توسط کارشناس عملیات شریفمند</li>
+                  <li>• انجام توسط کارشناس عملیات دادبان</li>
                 )}
               </ul>
             </Card>
@@ -77,7 +79,7 @@ export default async function ServiceDetail({ params }: { params: { slug: string
             {svc.requiresLawyer && (
               <div className="mt-4 rounded-xl border border-accent/30 bg-accent-soft p-4 text-sm text-foreground-soft">
                 <Icon name="scale" className="inline h-4 w-4 text-accent" /> {" "}
-                این موضوع نیازمند اقدام حرفه‌ای حقوقی است؛ پس از بررسی اولیه به وکیل دارای صلاحیت ارجاع داده می‌شود. شریفمند خود را جایگزین وکیل شما معرفی نمی‌کند.
+                این موضوع نیازمند اقدام حرفه‌ای حقوقی است؛ پس از بررسی اولیه به وکیل دارای صلاحیت ارجاع داده می‌شود. دادبان خود را جایگزین وکیل شما معرفی نمی‌کند.
               </div>
             )}
           </div>

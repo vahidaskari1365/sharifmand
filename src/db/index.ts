@@ -34,12 +34,18 @@ function getPool(): Pool {
         "(local: .env file — Vercel: Project Settings → Environment Variables) and redeploy.",
     );
   }
-  globalForDb.__arenaNextJsPostgresqlPool ??= new Pool({
-    connectionString: databaseUrl,
-    max: 2,
-    connectionTimeoutMillis: 8_000,
-    idleTimeoutMillis: 20_000,
-  });
+  if (!globalForDb.__arenaNextJsPostgresqlPool) {
+    const pool = new Pool({
+      connectionString: databaseUrl,
+      max: 2,
+      connectionTimeoutMillis: 8_000,
+      idleTimeoutMillis: 20_000,
+    });
+    pool.on("error", (err) => {
+      console.error("[dadban] idle db client error:", err);
+    });
+    globalForDb.__arenaNextJsPostgresqlPool = pool;
+  }
   return globalForDb.__arenaNextJsPostgresqlPool;
 }
 
@@ -49,7 +55,7 @@ function getDb() {
       if (!noopWarned) {
         noopWarned = true;
         console.warn(
-          "[sharifmand] DATABASE_URL is not set — running in degraded mode (DB sections will be empty).",
+          "[dadban] DATABASE_URL is not set — running in degraded mode (DB sections will be empty).",
         );
       }
       globalForDb.__arenaNextJsDrizzleDb = createNoopDb() as ReturnType<typeof drizzle>;

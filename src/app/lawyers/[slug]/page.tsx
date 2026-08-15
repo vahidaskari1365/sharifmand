@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { db } from "@/db";
 import { lawyers, reviews } from "@/db/schema";
-import { eq, sql, desc, ne } from "drizzle-orm";
+import { eq, sql, desc } from "drizzle-orm";
 import { Container, Button, StarRating, Avatar, Badge, Card, EmptyState } from "@/components/ui";
 import { Icon } from "@/components/icons";
 import { faNum, faPrice, relativeTime } from "@/lib/data";
@@ -17,8 +17,13 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const rows = await db.select().from(lawyers).where(eq(lawyers.slug, slug)).limit(1);
-  const l = rows[0];
+  let l: typeof lawyers.$inferSelect | undefined;
+  try {
+    const rows = await db.select().from(lawyers).where(eq(lawyers.slug, slug)).limit(1);
+    l = rows[0];
+  } catch (err) {
+    console.error("[dadban] lawyer metadata query failed:", err);
+  }
   if (!l) return { title: "وکیل یافت نشد" };
   return {
     title: `${l.name} — ${l.title} در ${l.city}`,
@@ -33,21 +38,29 @@ export default async function LawyerProfile({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const rows = await db.select().from(lawyers).where(eq(lawyers.slug, slug)).limit(1);
-  const l = rows[0];
+  let l: typeof lawyers.$inferSelect | undefined;
+  try {
+    const rows = await db.select().from(lawyers).where(eq(lawyers.slug, slug)).limit(1);
+    l = rows[0];
+  } catch (err) {
+    console.error("[dadban] lawyer profile query failed:", err);
+  }
   if (!l) notFound();
 
-  const lawyerReviews = await db
-    .select()
-    .from(reviews)
-    .where(eq(reviews.lawyerId, l.id))
-    .orderBy(desc(reviews.createdAt));
-
-  const related = await db
-    .select()
-    .from(lawyers)
-    .where(sql`${lawyers.specialties} && ARRAY[${l.specialties[0]}]::text[] AND ${lawyers.id} <> ${l.id}`)
-    .limit(3);
+  let lawyerReviews: typeof reviews.$inferSelect[] = [];
+  let related: typeof lawyers.$inferSelect[] = [];
+  try {
+    [lawyerReviews, related] = await Promise.all([
+      db.select().from(reviews).where(eq(reviews.lawyerId, l.id)).orderBy(desc(reviews.createdAt)),
+      db
+        .select()
+        .from(lawyers)
+        .where(sql`${lawyers.specialties} && ARRAY[${l.specialties[0]}]::text[] AND ${lawyers.id} <> ${l.id}`)
+        .limit(3),
+    ]);
+  } catch (err) {
+    console.error("[dadban] lawyer extras query failed:", err);
+  }
 
   // Increment views (non-blocking)
   db.update(lawyers).set({ views: sql`${lawyers.views} + 1` }).where(eq(lawyers.id, l.id)).then().catch(() => {});
@@ -247,7 +260,7 @@ export default async function LawyerProfile({
           <Card hover={false} className="bg-primary-soft/50">
             <p className="flex items-start gap-2 text-xs leading-6 text-foreground-soft">
               <Icon name="shield" className="mt-0.5 h-4 w-4 shrink-0 text-success" />
-              هویت و پروانه این وکیل توسط کارشناسان شریفمند راستی‌آزمایی شده است. مبلغ نهایی پیش از
+              هویت و پروانه این وکیل توسط کارشناسان دادبان راستی‌آزمایی شده است. مبلغ نهایی پیش از
               پرداخت مشخص است و بازگشت وجه طبق سیاست شفاف انجام می‌شود.
             </p>
           </Card>
