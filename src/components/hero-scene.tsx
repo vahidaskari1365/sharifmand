@@ -1,46 +1,32 @@
 "use client";
 
-import Image from "next/image";
 import { Icon } from "./icons";
 
 /**
  * Hero background for a legal platform.
- * A premium, on-brand photographic scene (scales of justice, courthouse
- * columns, law books — navy & gold) with a light and a dark variant, blended
- * into the page with theme-aware gradient washes so the centered content
- * stays readable in both themes. All decorative layers are
- * pointer-events-none; motion stays purposeful (scroll cue only).
  */
 export function HeroScene() {
   return (
     <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
       {/* Photographic background — light theme */}
-      <Image
+      <img
         src="/hero-bg-light.jpg"
         alt=""
-        fill
-        priority
-        sizes="100vw"
-        className="object-cover object-center dark:hidden"
+        className="absolute inset-0 object-cover object-center dark:hidden w-full h-full"
       />
       {/* Photographic background — dark theme */}
-      <Image
+      <img
         src="/hero-bg-dark.jpg"
         alt=""
-        fill
-        loading="eager"
-        sizes="100vw"
-        className="hidden object-cover object-center dark:block"
+        className="absolute inset-0 hidden object-cover object-center dark:block w-full h-full"
       />
 
-      {/* Theme-aware readability wash: blends the photo into the page
-          (fades at top under the transparent header and at the bottom
-          into the next section) while keeping the middle visible. */}
+      {/* Theme-aware readability wash: blends the photo into the page */}
       <div
         className="absolute inset-0"
         style={{
           background:
-            "linear-gradient(180deg, var(--background) 0%, color-mix(in oklab, var(--background) 22%, transparent) 18%, color-mix(in oklab, var(--background) 8%, transparent) 48%, color-mix(in oklab, var(--background) 12%, transparent) 70%, color-mix(in oklab, var(--background) 55%, transparent) 86%, var(--background) 100%)",
+            "linear-gradient(180deg, var(--background) 0%, color-mix(in oklab, var(--background) 22%, transparent) 18%, color-mix(in oklab, var(--background) 8%, transparent) 48%, color-mix(in oklab, var(--background) 0%, transparent) 100%)",
         }}
       />
       {/* Soft side vignettes for text focus */}
@@ -103,8 +89,8 @@ function FloatCard({
     tone === "accent"
       ? "bg-accent-soft text-accent"
       : tone === "success"
-        ? "bg-[color-mix(in_oklab,var(--success)_18%,transparent)] text-success"
-        : "bg-primary-soft text-primary";
+      ? "bg-[color-mix(in_oklab,var(--success)_18%,transparent)] text-success"
+      : "bg-primary-soft text-primary";
   return (
     <div className={`absolute ${className}`}>
       <div className="flex items-center gap-2.5 rounded-2xl border border-border bg-surface/85 px-3.5 py-2.5 shadow-[var(--shadow-lift)] backdrop-blur-md">
