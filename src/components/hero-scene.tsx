@@ -8,17 +8,15 @@ import { Icon } from "./icons";
 export function HeroScene() {
   return (
     <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
-      {/* Photographic background — light theme */}
-      <img
-        src="/hero-bg-light.jpg"
-        alt=""
-        className="absolute inset-0 object-cover object-center dark:hidden w-full h-full"
+      <div
+        className="absolute inset-0 dark:hidden bg-cover bg-center"
+        style={{ backgroundImage: "url('/hero-bg-light.jpg')" }}
+        aria-hidden
       />
-      {/* Photographic background — dark theme */}
-      <img
-        src="/hero-bg-dark.jpg"
-        alt=""
-        className="absolute inset-0 hidden object-cover object-center dark:block w-full h-full"
+      <div
+        className="absolute inset-0 hidden dark:block bg-cover bg-center"
+        style={{ backgroundImage: "url('/hero-bg-dark.jpg')" }}
+        aria-hidden
       />
 
       {/* Theme-aware readability wash: blends the photo into the page */}
